@@ -5,6 +5,7 @@
  */
 
 import { normalizeEmail, normalizeGoogleUrl, normalizeSiteUrl } from "./links.js";
+import { download, qrCard, qrPng, qrSvg, slug } from "./qr.js";
 
 const ICONS = "/assets/icons.svg";
 const SESSION_KEY = "dh-opinie-sesja";
@@ -437,6 +438,7 @@ function renderPanel() {
   $("panel-url").textContent = link.url.replace(/^https?:\/\//, "");
   $("panel-url").href = link.url;
   $("open-link").href = link.url;
+  $("qr-preview").innerHTML = qrSvg(link.url, 2);
 
   const savedMessage = load(`dh-opinie-wiadomosc-${link.id}`);
   $("msg-text").value =
@@ -485,6 +487,22 @@ $("share-link").addEventListener("click", async () => {
     copy($("msg-text").value, "Wiadomość skopiowana");
   }
 });
+
+document.querySelectorAll("[data-qr]").forEach((button) =>
+  button.addEventListener("click", async () => {
+    const { url, name } = state.link;
+    const file = `opinie-${slug(name)}`;
+    button.disabled = true;
+    try {
+      if (button.dataset.qr === "svg") download(new Blob([qrSvg(url)], { type: "image/svg+xml" }), `${file}-qr.svg`);
+      if (button.dataset.qr === "png") download(await qrPng(url), `${file}-qr.png`);
+      if (button.dataset.qr === "karta") download(await qrCard({ url, name }), `${file}-karta-a6.png`);
+      toast("Pobrano");
+    } finally {
+      button.disabled = false;
+    }
+  }),
+);
 
 $("logout").addEventListener("click", () => {
   setSession(null);

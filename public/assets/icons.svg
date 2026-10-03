@@ -22,6 +22,9 @@
   <symbol id="send" viewBox="0 0 24 24"><path d="M20.5 3.5L10 14M20.5 3.5L14 20.5l-4-6.5-6.5-4z"/></symbol>
   <symbol id="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 014.8.9c0 1.7-2.4 2.2-2.4 3.7M12 17h.01"/></symbol>
   <symbol id="link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></symbol>
+  <symbol id="qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 20.5h1.5M20.5 14v1.5"/></symbol>
+  <symbol id="download" viewBox="0 0 24 24"><path d="M12 4v11.5M7.5 11L12 15.5 16.5 11M5 19.5h14"/></symbol>
+  <symbol id="print" viewBox="0 0 24 24"><path d="M7 9V3.5h10V9M7 17.5H5A1.5 1.5 0 013.5 16v-5.5A1.5 1.5 0 015 9h14a1.5 1.5 0 011.5 1.5V16a1.5 1.5 0 01-1.5 1.5h-2"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></symbol>
   <!-- Znak Design House z designhouse.me: trzy kwadraty o stałym promieniu narożnika (siatka 151 x 106). -->
   <symbol id="dh" viewBox="0 0 151 106"><rect x="73.18" y="0" width="31.73" height="31.73" rx="5.88"/><rect x="0" y="31.82" width="73.39" height="73.39" rx="5.88"/><rect x="104.8" y="31.81" width="45.5" height="45.5" rx="5.88"/></symbol>
 </svg>
