@@ -6,7 +6,19 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#f1f0ee" />
     <title>Oceń naszą pracę</title>
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Podgląd linku w SMS-ie i na WhatsAppie. Tytuł, adres i obrazek ustawia Worker. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Design House" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:title" content="Oceń naszą pracę" />
+    <meta property="og:description" content="Jak oceniasz naszą pracę? To zajmie 10 sekund." />
+    <meta property="og:image" content="/og-ocena.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" />
@@ -49,7 +61,7 @@
             <span id="rate-cta-label">Wybierz ocenę</span>
             <svg class="i cta-arrow"><use href="/assets/icons.svg#chevrons" /></svg>
           </a>
-          <p class="foot"><a href="/" target="_blank" rel="noopener">Link do opinii · Design House</a></p>
+          <p class="foot"><a href="/" target="_blank" rel="noopener"><svg class="dh-mark" aria-hidden="true"><use href="/assets/icons.svg#dh" /></svg>Design House · Link do opinii</a></p>
         </div>
       </section>
 
@@ -143,16 +155,14 @@
           <p class="sub" id="sent-sub">Dziękujemy, że dajesz znać. Firma dostała ją na maila.</p>
         </div>
         <div class="bottom">
-          <p class="foot"><a href="/" target="_blank" rel="noopener">Link do opinii · Design House</a></p>
+          <p class="foot"><a href="/" target="_blank" rel="noopener"><svg class="dh-mark" aria-hidden="true"><use href="/assets/icons.svg#dh" /></svg>Design House · Link do opinii</a></p>
         </div>
       </section>
 
       <!-- Link nie istnieje albo jest wyłączony -->
       <section class="screen s-thanks" id="s-missing" aria-labelledby="missing-title" hidden>
         <header class="top"></header>
-        <div class="missing-mark grow" aria-hidden="true">
-          <span><svg class="i"><use href="/assets/icons.svg#link" /></svg></span>
-        </div>
+        <div class="thanks-art grow"><img src="/img/blad-link.webp" alt="" width="719" height="760" /></div>
         <div class="thanks-text">
           <h1 class="title" id="missing-title">Ten link nie działa</h1>
           <p class="sub">Mógł zostać wyłączony albo skopiował się z błędem. Poproś firmę o nowy.</p>

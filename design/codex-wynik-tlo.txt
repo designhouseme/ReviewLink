@@ -1,0 +1,6 @@
+Gotowe — oba PNG zapisane w **1024 × 1024 px**, po jednym wywołaniu generatora:
+
+- [tlo-jasne.png](/home/patryk/Programowanie/DHRewiev/design/zrodla/tlo-jasne.png)
+- [tlo-ciemne.png](/home/patryk/Programowanie/DHRewiev/design/zrodla/tlo-ciemne.png)
+
+Listing `./zrodla/` wykonany powyżej. Pozostałe pliki bez zmian.

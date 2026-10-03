@@ -6,7 +6,19 @@
     <meta name="theme-color" content="#f1f0ee" />
     <title>Link do opinii Google za darmo · Design House</title>
     <meta name="description" content="Jeden link dla wszystkich klientów. Zadowoleni trafiają prosto do opinii w Google, a uwagi przychodzą do Ciebie na maila. Za darmo, bez konta." />
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Design House" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:title" content="Link do opinii Google za darmo · Design House" />
+    <meta property="og:description" content="Zadowoleni klienci trafiają do Google, uwagi prosto do Ciebie. Jeden link, bez konta i abonamentu." />
+    <!-- Adres absolutny: przy przejściu na docelową domenę zmienić też tutaj. -->
+    <meta property="og:image" content="https://dh-opinie.maciej-36d.workers.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" />
@@ -19,9 +31,9 @@
         <!-- Start -->
         <section class="screen s-start" id="start" aria-labelledby="start-title">
           <header class="top">
-            <a class="brand" href="/" aria-label="Link do opinii, Design House">
-              <span class="brand-mark"><svg class="i"><use href="/assets/icons.svg#star" /></svg></span>
-              <span class="brand-text"><strong>Link do opinii</strong><small>Design House</small></span>
+            <a class="brand" href="/" aria-label="Design House · Link do opinii">
+              <img class="brand-logo" src="/brand/logo-dark.svg" alt="Design House" width="945" height="118" />
+              <span class="brand-product">Link do opinii</span>
             </a>
             <span class="spacer"></span>
             <button class="chip-btn" type="button" data-go="login">
@@ -198,9 +210,9 @@
         <!-- Panel: gotowy link, wiadomość do klienta, statystyki -->
         <section class="screen s-panel" id="panel" aria-labelledby="panel-title" hidden>
           <header class="top">
-            <a class="brand" href="/" aria-label="Link do opinii, Design House">
-              <span class="brand-mark"><svg class="i"><use href="/assets/icons.svg#star" /></svg></span>
-              <span class="brand-text"><strong>Link do opinii</strong><small>Design House</small></span>
+            <a class="brand" href="/" aria-label="Design House · Link do opinii">
+              <img class="brand-logo" src="/brand/logo-dark.svg" alt="Design House" width="945" height="118" />
+              <span class="brand-product">Link do opinii</span>
             </a>
             <span class="spacer"></span>
             <button class="icon-btn" type="button" data-go="firma" aria-label="Zmień dane">
@@ -264,6 +276,7 @@
           </div>
 
           <div class="upsell">
+            <img class="upsell-logo" src="/brand/logo-white.svg" alt="Design House" width="945" height="118" />
             <span class="kicker">Dla firm z dużą liczbą zleceń</span>
             <h2>Link może iść do klientów sam</h2>
             <p>Podepniemy go pod kalendarz, CRM albo fakturowanie. Po każdym zakończonym zleceniu klient dostanie SMS, a Ty nie musisz o tym pamiętać.</p>
@@ -275,12 +288,20 @@
           </div>
 
           <p class="panel-foot">Zmiana danych nie zmienia adresu linku. Wysłane wcześniej linki dalej działają.</p>
+
+          <footer class="made-by">
+            <svg class="dh-mark" aria-hidden="true"><use href="/assets/icons.svg#dh" /></svg>
+            <p>Link do opinii to darmowe narzędzie <b>Design House</b>. Robimy strony, automatyzacje i aplikacje dla polskich firm.</p>
+            <a class="text-link" href="https://designhouse.me" target="_blank" rel="noopener">designhouse.me<svg class="i"><use href="/assets/icons.svg#arrow-up-right" /></svg></a>
+          </footer>
         </section>
       </main>
 
       <!-- Podgląd na żywo: obok formularza na desktopie, po kliknięciu „oka” na telefonie -->
       <aside class="stage" id="stage" aria-label="Podgląd strony dla klienta">
-        <span class="stage-word" aria-hidden="true">opinie</span>
+        <a class="stage-logo" href="https://designhouse.me" target="_blank" rel="noopener" aria-label="Design House">
+          <img src="/brand/logo-dark.svg" alt="" width="945" height="118" />
+        </a>
         <div class="stage-top">
           <span class="stage-chip"><svg class="i"><use href="/assets/icons.svg#eye" /></svg>Tak zobaczy to klient</span>
           <button class="icon-btn stage-close" type="button" id="stage-close" aria-label="Zamknij podgląd">

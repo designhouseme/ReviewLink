@@ -200,8 +200,16 @@
 }
 
 .foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   color: var(--ink-3);
   text-decoration: none;
+}
+
+.foot .dh-mark {
+  width: 17px;
+  height: 12px;
 }
 
 .foot a:hover {
@@ -354,25 +362,8 @@
   margin: 10px auto 0;
 }
 
-.missing-mark {
-  display: grid;
-  place-items: center;
-}
-
-.missing-mark span {
-  display: grid;
-  place-items: center;
-  width: 128px;
-  height: 128px;
-  border: 1px dashed var(--line-2);
-  border-radius: 50%;
-  color: var(--ink-3);
-}
-
-.missing-mark .i {
-  width: 44px;
-  height: 44px;
-  stroke-width: 1.2;
+.s-thanks .top .brand-logo {
+  height: 16px;
 }
 
 /* Podgląd w ramce telefonu w generatorze: miejsce na udawany pasek statusu. */

@@ -1,0 +1,76 @@
+<!doctype html>
+<!--
+  Źródło obrazków do podglądu linku (1200 x 630).
+  ?v=app   -> public/og.png        (generator, marka Design House)
+  ?v=ocena -> public/og-ocena.png  (strona oceny wysyłana klientom firm)
+  Zrzut: Playwright, viewport 1200 x 630, deviceScaleFactor 1.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+      body {
+        position: relative;
+        font-family: "Urbanist", sans-serif;
+        color: #1c1b1a;
+        background: radial-gradient(70% 90% at 0% 0%, #f8ddcc 0%, rgb(248 221 204 / 0) 62%), #f1f0ee;
+      }
+      .left { position: absolute; top: 64px; left: 72px; width: 640px; }
+      .logo { display: block; height: 26px; }
+      .product { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; color: #6c6863; font-size: 22px; font-weight: 600; }
+      .product::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #ff6a2b; }
+      h1 { margin: 30px 0 0; font-size: 74px; font-weight: 400; line-height: 1.02; letter-spacing: -0.03em; }
+      p { margin: 22px 0 0; max-width: 30ch; color: #6c6863; font-size: 28px; line-height: 1.35; }
+      .stars { position: absolute; left: 72px; bottom: 64px; display: flex; gap: 12px; }
+      .stars span { display: grid; place-items: center; width: 74px; height: 74px; border-radius: 22px; background: #ff6a2b; }
+      .stars span.off { background: #fff; border: 1.5px solid #e8e5e1; }
+      .stars svg { width: 36px; height: 36px; fill: #fff; stroke: #fff; stroke-width: 1.4; stroke-linejoin: round; }
+      .stars .off svg { fill: none; stroke: #a29d97; }
+      .art { position: absolute; right: 40px; bottom: 30px; height: 540px; }
+      .chip { position: absolute; display: inline-flex; align-items: center; gap: 10px; padding: 9px 20px 9px 9px; border: 1.5px solid #e8e5e1; border-radius: 999px; background: #fff; font-size: 21px; font-weight: 600; box-shadow: 0 18px 36px -24px rgb(28 27 26 / 0.5); }
+      .chip b { padding: 7px 13px; border-radius: 999px; background: #ff6a2b; color: #fff; font-size: 19px; }
+      .chip.bad b { background: #222120; }
+      .ocena .left { top: 72px; }
+      .ocena h1 { margin-top: 40px; font-size: 84px; }
+      .brandline { position: absolute; left: 72px; bottom: 36px; display: none; align-items: center; gap: 10px; color: #a29d97; font-size: 19px; font-weight: 600; }
+      .brandline svg { width: 24px; height: 17px; fill: currentColor; }
+      .ocena .brandline { display: inline-flex; }
+      .ocena .stars { bottom: 96px; }
+    </style>
+  </head>
+  <body>
+    <div class="left">
+      <img class="logo" id="logo" src="../public/brand/logo-dark.svg" alt="" />
+      <div class="product" id="product">Link do opinii</div>
+      <h1 id="title">Opinie w Google<br />jednym linkiem</h1>
+      <p id="sub">Zadowoleni klienci do Google, uwagi prosto do Ciebie. Za darmo, bez konta.</p>
+    </div>
+    <div class="stars" id="stars"></div>
+    <img class="art" id="art" src="../design/zrodla/hero-fachowiec.png" alt="" />
+    <span class="chip" id="chip1" style="right: 250px; top: 392px"><b>4–5 ★</b> opinia w Google</span>
+    <span class="chip bad" id="chip2" style="right: 270px; top: 460px"><b>1–3 ★</b> wiadomość do Ciebie</span>
+    <div class="brandline">
+      <svg viewBox="0 0 151 106"><rect x="73.18" y="0" width="31.73" height="31.73" rx="5.88"/><rect x="0" y="31.82" width="73.39" height="73.39" rx="5.88"/><rect x="104.8" y="31.81" width="45.5" height="45.5" rx="5.88"/></svg>
+      Design House · Link do opinii
+    </div>
+    <script>
+      const star = '<svg viewBox="0 0 24 24"><path d="M12 3.4l2.65 5.37 5.93.86-4.29 4.18 1.01 5.9L12 16.92l-5.3 2.79 1.01-5.9-4.29-4.18 5.93-.86z"/></svg>';
+      const ocena = new URLSearchParams(location.search).get("v") === "ocena";
+      document.getElementById("stars").innerHTML = [1, 2, 3, 4, 5].map((n) => `<span class="${!ocena || n <= 4 ? "" : "off"}">${star}</span>`).join("");
+      if (ocena) {
+        document.body.classList.add("ocena");
+        document.getElementById("logo").remove();
+        document.getElementById("product").remove();
+        document.getElementById("title").innerHTML = "Jak oceniasz<br />naszą pracę?";
+        document.getElementById("sub").textContent = "Wybierz gwiazdki. To zajmie 10 sekund.";
+        document.getElementById("art").src = "../design/zrodla/dzieki-google.png";
+        document.getElementById("art").style.height = "500px";
+        document.getElementById("chip1").remove();
+        document.getElementById("chip2").remove();
+      }
+    </script>
+  </body>
+</html>

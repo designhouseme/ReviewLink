@@ -106,6 +106,21 @@ button {
   stroke-linejoin: round;
 }
 
+/* Marka Design House: wordmark z designhouse.me i znak z trzech kwadratów. */
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 17px;
+}
+
+.dh-mark {
+  width: 1.425em;
+  height: 1em;
+  flex: none;
+  fill: currentColor;
+  stroke: none;
+}
+
 /* ---------------------------------------------------------------- */
 /* Ekran: pełna wysokość telefonu, przyciski na dole przy kciuku.     */
 /* ---------------------------------------------------------------- */

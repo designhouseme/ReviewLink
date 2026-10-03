@@ -6,42 +6,31 @@
 
 .brand {
   display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   min-width: 0;
   color: inherit;
   text-decoration: none;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  flex: none;
+.brand-product {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.brand-product::before {
+  content: "";
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--orange);
-  color: #fff;
-}
-
-.brand-mark .i {
-  width: 20px;
-  height: 20px;
-  fill: #fff;
-}
-
-.brand-text strong {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.15;
-}
-
-.brand-text small {
-  display: block;
-  color: var(--ink-3);
-  font-size: 12.5px;
-  font-weight: 500;
 }
 
 .chip-btn {
@@ -897,11 +886,18 @@
   padding: 22px 18px 18px;
   border-radius: var(--r-card);
   background:
-    radial-gradient(70% 60% at 0% 0%, rgb(255 106 43 / 0.5) 0%, rgb(255 106 43 / 0) 65%),
-    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px) 0 0 / 28px 28px,
-    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px) 0 0 / 28px 28px,
-    #161413;
+    linear-gradient(100deg, rgb(20 18 17 / 0.92) 0%, rgb(20 18 17 / 0.72) 55%, rgb(20 18 17 / 0.2) 100%),
+    url("/img/tlo-ciemne.webp") right center / cover no-repeat,
+    #141211;
   color: #fff;
+}
+
+.upsell-logo {
+  display: block;
+  width: auto;
+  height: 15px;
+  margin-bottom: 18px;
+  opacity: 0.92;
 }
 
 .upsell .kicker {
@@ -924,16 +920,53 @@
 }
 
 .panel-foot {
-  margin: 4px 0 8px;
+  margin: 4px 0 0;
   color: var(--ink-3);
   font-size: 13px;
   text-align: center;
+}
+
+.made-by {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 2px 12px;
+  align-items: start;
+  margin-top: 6px;
+  padding: 18px 2px 6px;
+  border-top: 1px solid var(--line);
+}
+
+.made-by .dh-mark {
+  grid-row: span 2;
+  width: 36px;
+  height: 25px;
+  margin-top: 3px;
+  color: var(--ink);
+}
+
+.made-by p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.made-by b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.made-by .text-link {
+  justify-self: start;
+  padding-left: 0;
 }
 
 /* ---------------------------------------------------------------- */
 /* Podgląd w ramce telefonu                                           */
 /* ---------------------------------------------------------------- */
 
+/* Tło od Codexa: kostki ze znaku Design House na brzegach, pusty środek pod telefon.
+   Wersja ciemna leży obok (/img/tlo-ciemne.webp) - wtedy chip i zakładki na jasno. */
 .stage {
   position: relative;
   display: none;
@@ -943,32 +976,27 @@
   gap: 18px;
   overflow: hidden;
   padding: 24px;
-  background:
-    radial-gradient(60% 45% at 0% 0%, rgb(255 106 43 / 0.5) 0%, rgb(255 106 43 / 0) 70%),
-    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(#1b1816, #111010);
-  color: #fff;
+  background: url("/img/tlo-jasne.webp") center / cover no-repeat, #f1f0ee;
+  color: var(--ink);
 }
 
-.stage-word {
+.stage-logo {
   position: absolute;
-  bottom: -0.2em;
-  left: 50%;
-  color: transparent;
-  font-size: clamp(160px, 22vw, 360px);
-  font-weight: 300;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  white-space: nowrap;
-  transform: translateX(-50%);
-  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.1);
-  pointer-events: none;
-  user-select: none;
+  top: 30px;
+  left: 32px;
+  display: none;
+  opacity: 0.85;
+  transition: opacity 0.15s;
 }
 
-.stage-word::first-letter {
-  -webkit-text-stroke-color: rgb(255 106 43 / 0.5);
+.stage-logo:hover {
+  opacity: 1;
+}
+
+.stage-logo img {
+  display: block;
+  width: auto;
+  height: 17px;
 }
 
 .stage-top {
@@ -983,11 +1011,12 @@
   align-items: center;
   gap: 8px;
   padding: 9px 15px 9px 12px;
-  border: 1px solid rgb(255 255 255 / 0.14);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.07);
+  background: rgb(255 255 255 / 0.78);
   font-size: 14px;
   font-weight: 600;
+  backdrop-filter: blur(12px);
 }
 
 .stage-chip .i {
@@ -997,9 +1026,6 @@
 
 .stage-close {
   display: none;
-  border-color: rgb(255 255 255 / 0.18);
-  background: rgb(255 255 255 / 0.08);
-  color: #fff;
 }
 
 .phone-wrap {
@@ -1022,7 +1048,7 @@
   box-shadow:
     0 0 0 2px #2c2a28,
     inset 0 0 0 1px rgb(255 255 255 / 0.1),
-    0 50px 90px -30px rgb(0 0 0 / 0.8);
+    0 50px 90px -34px rgb(28 27 26 / 0.55);
   transform: scale(var(--s));
   transform-origin: 0 0;
 }
@@ -1103,9 +1129,10 @@
   display: flex;
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgb(255 255 255 / 0.12);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.06);
+  background: rgb(255 255 255 / 0.78);
+  backdrop-filter: blur(12px);
 }
 
 .stage-tabs button {
@@ -1114,15 +1141,15 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: rgb(255 255 255 / 0.7);
+  color: var(--ink-2);
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .stage-tabs button[aria-selected="true"] {
-  background: #fff;
-  color: var(--ink);
+  background: var(--dark);
+  color: #fff;
 }
 
 /* Telefon: podgląd jako pełny ekran po kliknięciu „oka”. */
@@ -1169,9 +1196,15 @@
 
   .stage {
     position: sticky;
-    top: 0;
+    top: 12px;
     display: flex;
-    height: 100dvh;
+    height: calc(100dvh - 24px);
+    margin: 12px 12px 12px 0;
+    border-radius: 36px;
+  }
+
+  .stage-logo {
+    display: block;
   }
 
   .preview-btn {

@@ -91,8 +91,14 @@ async function reviewPage(request, env, id) {
     turnstile: env.TURNSTILE_SITE_KEY || null,
   };
 
+  const origin = publicOrigin(request, env);
   return new HTMLRewriter()
     .on("title", { element: (el) => el.setInnerContent(`Oceń: ${link.name}`) })
+    .on('meta[property="og:title"]', { element: (el) => el.setAttribute("content", `Oceń: ${link.name}`) })
+    .on('meta[property="og:description"]', {
+      element: (el) => el.setAttribute("content", `Jak oceniasz pracę ${link.name}? To zajmie 10 sekund.`),
+    })
+    .on('meta[property="og:image"]', { element: (el) => el.setAttribute("content", `${origin}/og-ocena.png`) })
     .on("[data-company]", { element: (el) => el.setInnerContent(link.name) })
     .on("script#cfg", { element: (el) => el.setInnerContent(scriptJson(cfg), { html: true }) })
     .transform(new Response(template.body, { status: 200, headers }));
@@ -401,8 +407,19 @@ async function sendMail(env, { to, subject, text, replyTo }) {
     ...(replyTo ? { replyTo } : {}),
     subject,
     text,
-    html: `<div style="font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1c1b1a;white-space:pre-wrap">${escapeHtml(text)}</div>`,
+    html: emailHtml(text),
   });
+}
+
+/** Prosty szablon w barwach Design House. Bez obrazków - klienty poczty często je blokują. */
+function emailHtml(text) {
+  return `<!doctype html><html lang="pl"><body style="margin:0;padding:24px 12px;background:#f1f0ee">
+<div style="max-width:560px;margin:0 auto;overflow:hidden;border:1px solid #e8e5e1;border-radius:20px;background:#ffffff">
+<div style="padding:18px 24px;background:#111214;color:#ffffff;font:700 16px/1.2 -apple-system,Segoe UI,Arial,sans-serif;letter-spacing:.01em">Design House <span style="color:#ff6a2b">&#9679;</span> <span style="font-weight:500;color:#cfcac4">Link do opinii</span></div>
+<div style="padding:24px;font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1c1b1a;white-space:pre-wrap">${escapeHtml(text)}</div>
+</div>
+<p style="max-width:560px;margin:14px auto 0;font:12px/1.5 -apple-system,Segoe UI,Arial,sans-serif;color:#a29d97;text-align:center">Design House · <a href="https://designhouse.me" style="color:#a29d97">designhouse.me</a></p>
+</body></html>`;
 }
 
 async function turnstileOk(env, token, request) {
