@@ -32,17 +32,23 @@
     }
   ],
 
-  // Bez `remote: true`: lokalnie maile są tylko symulowane (zapis do pliku
-  // .eml), żeby testy nie wysyłały prawdziwych wiadomości. Przed startem
-  // sprawdzić, czy Email Sending na koncie wysyła na dowolny adres - kody
-  // i uwagi idą do firm, nie tylko do Macieja.
-  "send_email": [{ "name": "EMAIL" }],
-
+  // Maile idą przez Resend (src/mailer.js). Klucz to sekret:
+  //   npx wrangler secret put RESEND_API_KEY
+  // a domena z MAIL_FROM musi być zweryfikowana w Resend. Lokalnie bez klucza
+  // maile tylko lądują w konsoli (DEV_SHOW_CODE=1 w .dev.vars).
   "vars": {
     "MAIL_FROM": "kontakt@designhouse.me",
-    "MAIL_FROM_NAME": "Design House · Link do opinii",
-    "CONTACT_URL": "https://designhouse.me/kontakt"
+    "MAIL_FROM_NAME": "ReviewLink · Design House",
+    "CONTACT_URL": "https://designhouse.me/kontakt",
+    // Adres w mailach i linkach. Cron nie ma żądania, więc musi go znać z góry.
+    // Lokalnie nadpisuje go .dev.vars (http://localhost:8790).
+    "PUBLIC_ORIGIN": "https://dh-opinie.maciej-36d.workers.dev"
   },
+
+  // Raport tygodniowy: poniedziałek 6:00 UTC (8:00 latem, 7:00 zimą w Polsce).
+  // Test lokalnie: npm run dev -- --test-scheduled, potem
+  //   curl "http://localhost:8790/cdn-cgi/handler/scheduled?cron=0+6+*+*+1"
+  "triggers": { "crons": ["0 6 * * 1"] },
 
   // Na razie tylko adres testowy: dh-opinie.maciej-36d.workers.dev.
   "workers_dev": true,

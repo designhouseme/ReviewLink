@@ -1,6 +1,6 @@
 # ReviewLink: dokumentacja techniczna
 
-Cloudflare Workers + D1, bez frameworka i bez builda. Opis dla użytkowników jest w [README](../README.md).
+Cloudflare Workers + D1, maile przez Resend, bez frameworka i bez builda. Opis dla użytkowników jest w [README](../README.md).
 
 ## Link i kod QR
 
@@ -18,23 +18,39 @@ npm run db:seed                  # przykładowe linki: /o/demo123 i /o/demourl
 npm run dev                      # http://localhost:8790
 ```
 
-Maile lokalnie są tylko symulowane. Wrangler wypisuje w konsoli ścieżkę do pliku z treścią.
+Bez `RESEND_API_KEY` maile lokalnie nie wychodzą, tylko ich treść tekstowa ląduje w konsoli `wrangler dev`. Podgląd HTML wszystkich maili z przykładowymi danymi:
+
+```bash
+node scripts/email-preview.mjs   # pliki w .wrangler/email-preview/
+```
+
+Raport tygodniowy lokalnie (`db:seed` dodaje zdarzenia z ostatnich 14 dni dla `/o/demo123`):
+
+```bash
+npm run dev -- --test-scheduled
+curl "http://localhost:8790/cdn-cgi/handler/scheduled?cron=0+6+*+*+1"
+```
 
 ## Wdrożenie
 
 ```bash
+npx wrangler secret put RESEND_API_KEY                # raz, klucz z panelu Resend
+npx wrangler d1 migrations apply dh-opinie --remote   # po każdej nowej migracji (teraz 0002)
 npm run deploy                                        # wrangler deploy
-npx wrangler d1 migrations apply dh-opinie --remote   # po każdej nowej migracji
 ```
 
-Na koncie są już: Worker `dh-opinie`, baza D1 `dh-opinie` (region EEUR) i sekret `HASH_PEPPER`.
+Na koncie są już: Worker `dh-opinie`, baza D1 `dh-opinie` (region EEUR) i sekret `HASH_PEPPER`. Brakuje `RESEND_API_KEY`: bez niego na produkcji nie wyjdzie żaden mail, także kod logowania.
 
 ## Jak to jest zbudowane
 
 | Plik | Co robi |
 |---|---|
-| [`src/worker.js`](../src/worker.js) | API `/api/*` i strona oceny `/o/:id` (szablon i dane przez HTMLRewriter) |
+| [`src/worker.js`](../src/worker.js) | API `/api/*`, strona oceny `/o/:id` (szablon i dane przez HTMLRewriter) i cron z raportem tygodniowym |
+| [`src/emails.js`](../src/emails.js) | szablony maili (HTML i tekst), czysty moduł do podglądu w Node |
+| [`src/mailer.js`](../src/mailer.js) | wysyłka przez Resend: pojedyncze maile i paczki do 100 |
 | [`migrations/0001_init.sql`](../migrations/0001_init.sql) | tabele `links`, `codes`, `sessions`, `events` |
+| [`migrations/0002_raport_tygodniowy.sql`](../migrations/0002_raport_tygodniowy.sql) | `links.weekly` (zgoda na raport) i `links.report_week` (ostatnio wysłany tydzień) |
+| [`public/mail/`](../public/mail/) | grafiki PNG i font Urbanist do maili; PNG robi [`scripts/mail-assets.mjs`](../scripts/mail-assets.mjs) |
 | [`public/index.html`](../public/index.html), [`assets/app.js`](../public/assets/app.js) | generator i panel firmy |
 | [`public/ocena.html`](../public/ocena.html), [`assets/ocena.js`](../public/assets/ocena.js) | strona dla klienta; `?podglad=1` to podgląd w generatorze |
 | [`public/assets/links.js`](../public/assets/links.js) | walidacja linków, wspólna dla Workera i przeglądarki |
@@ -49,20 +65,34 @@ API:
 | `GET /api/link` · `PUT /api/link` | odczyt i zapis linku firmy (sesja), zapis tworzy albo aktualizuje link |
 | `POST /api/o/:id/event` | statystyki: `view`, `rate`, `google` |
 | `POST /api/o/:id/feedback` | wiadomość od klienta, wysyłana mailem do firmy |
+| `GET /api/raport/wypisz` · `POST` | wypis z raportu tygodniowego (podpisany link z maila); GET pokazuje przycisk, POST wypisuje |
+
+## Maile
+
+Wszystkie idą przez Resend z adresu `MAIL_FROM` (domena musi być zweryfikowana w Resend, z rekordami SPF i DKIM). Szablony w [`src/emails.js`](../src/emails.js) są w stylu aplikacji: ciepłe tło, biała karta, brzoskwiniowa poświata z ilustracją z serii, pomarańczowe gwiazdki i duże cienkie cyfry. Są zbudowane na tabelach i stylach inline, a grafiki to PNG (Gmail i Outlook nie pokazują SVG ani WebP). Z zablokowanymi obrazkami mail dalej jest czytelny.
+
+| Mail | Kiedy |
+|---|---|
+| Kod logowania | `POST /api/code` |
+| Link gotowy | pierwszy zapis linku |
+| Uwagi od klienta | 1–3 gwiazdki i wiadomość; `reply_to` to kontakt klienta, jeśli podał e-mail |
+| Podsumowanie tygodnia | cron w poniedziałek 6:00 UTC |
+
+**Podsumowanie tygodnia** obejmuje poprzedni pełny tydzień od poniedziałku do niedzieli w czasie warszawskim, także w tygodniach ze zmianą czasu. Dostają je firmy z `weekly = 1`, u których w tym tygodniu było choć jedno zdarzenie: tydzień samych zer nie jest wysyłany. Paczki po 100 maili mają `Idempotency-Key`, a po udanej paczce zapisujemy `report_week`, więc ponowne uruchomienie crona nie wyśle raportu drugi raz. Mail ma nagłówki `List-Unsubscribe` i `List-Unsubscribe-Post` (wypis jednym kliknięciem w Gmailu). Ponownego zapisu na raport w panelu jeszcze nie ma.
 
 ## Zabezpieczenia
 
 - **Tylko Google:** strona oceny przekierowuje wyłącznie do domen Google. Link jest sprawdzany przy zapisie i jeszcze raz przy każdym wyświetleniu. Na stronę firmy nie przekierowujemy automatycznie: klient widzi przycisk z adresem.
 - **Kody:** 6 cyfr, ważne 15 minut, najwyżej 5 prób, w bazie tylko hash. Wysyłka: 3 kody na godzinę na adres e-mail i 10 na IP.
 - **Uwagi od klientów:** najwyżej 3 na godzinę z jednego IP na link i 40 na dobę na link. Formularz ma ukryte pole na boty, a Turnstile włącza się po ustawieniu kluczy.
-- **Nazwa firmy w szablonie:** tekst escapuje HTMLRewriter, a w JSON każdy `<` jest zamieniany na `<`.
+- **Nazwa firmy w szablonie:** tekst escapuje HTMLRewriter, a w JSON każdy `<` jest zamieniany na `\u003c`. W mailach każde pole od klienta i firmy przechodzi przez `esc()`.
 - **Prywatność:** treści uwag nie zapisujemy, a adresy IP trzymamy tylko jako hash.
 
 ## Marka
 
 Produkt nazywa się **ReviewLink** i występuje pod marką **Design House**. W interfejsie aplikacji wciąż jest dawna nazwa „Link do opinii”. Wordmark i znak (trzy kwadraty o stałym promieniu narożnika) pochodzą prosto z designhouse.me ([`public/brand/`](../public/brand/)), tak samo jak favicony i ikona dla iOS. Kolor interfejsu to pomarańcz `#ff6a2b` z referencji projektu.
 
-Obrazki do podglądu linku w SMS-ie, na WhatsAppie i w social mediach: [`public/og.png`](../public/og.png) (generator) i [`public/og-ocena.png`](../public/og-ocena.png) (strona oceny; tytuł z nazwą firmy dopisuje Worker). Źródłem obu jest [`design/og.html`](../design/og.html): zrzut 1200×630 w Playwright z `?v=app` i `?v=ocena`. Maile mają prosty szablon w barwach Design House, bez obrazków.
+Obrazki do podglądu linku w SMS-ie, na WhatsAppie i w social mediach: [`public/og.png`](../public/og.png) (generator) i [`public/og-ocena.png`](../public/og-ocena.png) (strona oceny; tytuł z nazwą firmy dopisuje Worker). Źródłem obu jest [`design/og.html`](../design/og.html): zrzut 1200×630 w Playwright z `?v=app` i `?v=ocena`. Maile opisuje sekcja „Maile” wyżej.
 
 ## Grafiki
 
@@ -84,9 +114,9 @@ Nowe grafiki w tym samym stylu: wspólne zasady leżą w [`design/_styl.md`](../
 
 ## Przed startem na produkcji
 
-1. **Domena (przed promowaniem kodów QR):** subdomena (np. `opinie.designhouse.me`) albo osobna krótka domena, która daje krótsze linki i oddziela reputację od designhouse.me. Wydrukowany kod QR ma adres zapisany na stałe, więc po zmianie domeny stary adres `*.workers.dev` musi dalej przekierowywać. Ustawić `PUBLIC_ORIGIN`, dodać trasę w `wrangler.jsonc` i podmienić absolutny adres `og:image` w `public/index.html`.
+1. **Domena (przed promowaniem kodów QR):** subdomena (np. `opinie.designhouse.me`) albo osobna krótka domena, która daje krótsze linki i oddziela reputację od designhouse.me. Wydrukowany kod QR ma adres zapisany na stałe, więc po zmianie domeny stary adres `*.workers.dev` musi dalej przekierowywać. Zmienić `PUBLIC_ORIGIN` w `wrangler.jsonc` (z niego biorą się linki w mailach), dodać trasę i podmienić absolutny adres `og:image` w `public/index.html`.
 2. **Turnstile:** założyć widżet, potem `TURNSTILE_SECRET` (sekret) i `TURNSTILE_SITE_KEY` (zmienna).
-3. **Maile:** sprawdzić na prawdziwym adresie spoza designhouse.me, że kod dochodzi. Nadawca jest ustawiony w `MAIL_FROM`.
+3. **Maile:** zweryfikować domenę `designhouse.me` w Resend, ustawić sekret `RESEND_API_KEY` i sprawdzić na prawdziwym adresie spoza designhouse.me (Gmail, Outlook), że kod dochodzi i nie trafia do spamu.
 4. **Fonty:** Urbanist ładuje się dziś z Google Fonts, także na stronie dla klientów firm. Pod RODO lepiej trzymać go u siebie (licencja OFL).
 5. **Sprzątanie:** wygasłe sesje usuwa logowanie, ale stare `codes` i `events` warto czyścić cronem.
 6. **Nagłówki:** przy dodawaniu `_headers` zostawić `frame-ancestors 'self'`, bo inaczej podgląd w ramce telefonu przestanie działać.

@@ -1,4 +1,13 @@
 <p align="center">
+  <a href="https://designhouse.me">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-white.svg" />
+      <img src="public/brand/logo-dark.svg" alt="Design House" height="30" />
+    </picture>
+  </a>
+</p>
+
+<p align="center">
   <img src="docs/reviewlink-showreel.webp" alt="ReviewLink w akcji: klient wybiera gwiazdki na telefonie, zadowolony trafia do Google, uwagi idą do firmy" width="800" />
 </p>
 
@@ -23,14 +32,6 @@ Po skończonym zleceniu wysyłasz klientowi swój link. Klient widzi pięć gwia
 
 - **4–5 gwiazdek:** otwiera mu się okno opinii w Google, gotowe do wpisania.
 - **1–3 gwiazdki:** może napisać, co poszło nie tak. Wiadomość trafia na Twój e-mail i nie jest nigdzie publikowana.
-
-```mermaid
-flowchart LR
-  A[Kończysz zlecenie] -->|wysyłasz link| B(Klient wybiera gwiazdki)
-  B -->|4–5 ★| C[Opinia w Google]
-  B -->|1–3 ★| D[Wiadomość na Twój e-mail]
-  D -. mały link .-> C
-```
 
 ## Jak zacząć
 
@@ -88,7 +89,3 @@ Uruchomienie lokalne, wdrożenie, API i zabezpieczenia opisuje [docs/techniczne.
 Kod jest udostępniony na licencji [Apache 2.0](LICENSE). Możesz go używać, zmieniać i rozpowszechniać, także komercyjnie, pod warunkiem że zachowasz informację o autorstwie **Design House** z pliku [NOTICE](NOTICE) i oznaczysz swoje zmiany.
 
 Licencja nie obejmuje nazw „Design House” i „ReviewLink” ani znaku i logo Design House.
-
-<p align="center">
-  <a href="https://designhouse.me"><img src="public/brand/logo-dark.svg" alt="Design House" height="22" /></a>
-</p>

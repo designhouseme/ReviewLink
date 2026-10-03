@@ -1,5 +1,5 @@
 /**
- * Worker Linku do opinii. Statyczne pliki idą prosto z `public/`, ten kod
+ * Worker ReviewLink. Statyczne pliki idą prosto z `public/`, ten kod
  * obsługuje tylko `/api/*` i strony oceny `/o/:id` (patrz `run_worker_first`).
  *
  * Konta nie ma: firma potwierdza adres e-mail jednorazowym kodem i dostaje
@@ -12,6 +12,8 @@
  */
 
 import { normalizeEmail, normalizeGoogleUrl, normalizeSiteUrl } from "../public/assets/links.js";
+import { codeEmail, feedbackEmail, linkReadyEmail, weeklyEmail } from "./emails.js";
+import { RESEND_BATCH_MAX, sendBatch, sendMail } from "./mailer.js";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -20,7 +22,7 @@ const CODE_TTL = 15 * MINUTE;
 const CODE_ATTEMPTS = 5;
 const SESSION_TTL = 7 * DAY;
 const ID_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz";
-const RATING_LABELS = ["", "Źle", "Słabo", "Średnio", "Dobrze", "Rewelacja"];
+const TZ = "Europe/Warsaw";
 
 export default {
   async fetch(request, env, ctx) {
@@ -30,6 +32,9 @@ export default {
     try {
       const review = pathname.match(/^\/o\/([A-Za-z0-9]{3,20})\/?$/);
       if (review && request.method === "GET") return reviewPage(request, env, review[1].toLowerCase());
+
+      // Wypis z raportów: chroni go podpis w adresie, a one-click z Gmaila przychodzi z obcym Origin.
+      if (pathname === "/api/raport/wypisz") return unsubscribe(request, env, url);
 
       if (pathname.startsWith("/api/")) {
         if (request.method === "POST" || request.method === "PUT") {
@@ -54,6 +59,11 @@ export default {
       console.error("worker:", error);
       return json({ ok: false, error: "Coś poszło nie tak. Spróbuj za chwilę." }, 500);
     }
+  },
+
+  // Cron z wrangler.jsonc: w poniedziałek rano raport z poprzedniego tygodnia.
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(weeklyReports(env, controller.scheduledTime));
   },
 };
 
@@ -152,31 +162,11 @@ async function sendFeedback(request, env, id) {
   const perDay = await countSince(env, "SELECT COUNT(*) AS n FROM events WHERE kind = 'feedback' AND link_id = ? AND created_at > ?", id, now - DAY);
   if (fromIp >= 3 || perDay >= 40) return json({ ok: false, error: "Wysłano już kilka wiadomości. Spróbuj później." }, 429);
 
-  const replyTo = normalizeEmail(contact);
-  const starsLine = stars ? `${"★".repeat(stars)}${"☆".repeat(5 - stars)}  ${stars}/5 · ${RATING_LABELS[stars]}` : "bez oceny";
-  const text = [
-    `Ocena: ${starsLine}`,
-    "",
-    message,
-    "",
-    "-",
-    name ? `Klient: ${name}` : "Klient nie podał imienia.",
-    contact ? `Kontakt: ${contact}` : "Klient nie zostawił kontaktu.",
-    replyTo ? "Odpowiedz na tego maila, a wiadomość trafi prosto do klienta." : "",
-    "",
-    "Tej wiadomości nie publikujemy - widzisz ją tylko Ty.",
-    `Chcesz, żeby link do opinii szedł sam po każdym zleceniu? ${env.CONTACT_URL}`,
-  ]
-    .filter((line, i, all) => line !== "" || all[i - 1] !== "")
-    .join("\n");
+  const replyTo = normalizeEmail(contact) || undefined;
+  const mail = feedbackEmail({ origin: publicOrigin(request, env), company: link.name, stars, message, name, contact, replyTo });
 
   try {
-    await sendMail(env, {
-      to: link.email,
-      replyTo: replyTo || undefined,
-      subject: `Uwagi od klienta${stars ? ` (${stars}/5)` : ""}${name ? ` · ${name}` : ""}`,
-      text,
-    });
+    await sendMail(env, { to: link.email, replyTo, tag: "feedback", ...mail });
   } catch (error) {
     console.error("mail z uwagami:", error);
     return json({ ok: false, error: "Nie udało się wysłać wiadomości. Spróbuj za chwilę." }, 502);
@@ -215,16 +205,7 @@ async function sendCode(request, env) {
     .run();
 
   try {
-    await sendMail(env, {
-      to: email,
-      subject: `Twój kod: ${code}`,
-      text: [
-        `Kod do Linku do opinii: ${code}`,
-        "",
-        "Wpisz go na stronie, na której go zamówiłeś. Jest ważny 15 minut.",
-        "Jeśli to nie Ty prosiłeś o kod, zignoruj tę wiadomość.",
-      ].join("\n"),
-    });
+    await sendMail(env, { to: email, tag: "code", ...codeEmail({ origin: publicOrigin(request, env), code }) });
   } catch (error) {
     console.error("mail z kodem:", error);
     return json({ ok: false, error: "Nie udało się wysłać maila. Sprawdź adres albo spróbuj za chwilę." }, 502);
@@ -319,21 +300,9 @@ async function saveLink(request, env, ctx) {
 
   const publicUrl = `${publicOrigin(request, env)}/o/${id}`;
   ctx.waitUntil(
-    sendMail(env, {
-      to: email,
-      subject: "Twój link do opinii jest gotowy",
-      text: [
-        `Link dla klientów firmy ${name}:`,
-        publicUrl,
-        "",
-        "Wyślij go klientowi na koniec zlecenia - SMS-em, mailem albo na WhatsAppie.",
-        "Zadowoleni trafią prosto do Google, a uwagi przyjdą na ten adres.",
-        "",
-        `Zmiana danych: wejdź na ${publicOrigin(request, env)} i kliknij „Mam już link”. Adres linku się nie zmieni.`,
-        "",
-        `Chcesz, żeby link szedł do klientów sam? ${env.CONTACT_URL}`,
-      ].join("\n"),
-    }).catch((error) => console.error("mail z linkiem:", error)),
+    sendMail(env, { to: email, tag: "link", ...linkReadyEmail({ origin: publicOrigin(request, env), name, url: publicUrl }) }).catch((error) =>
+      console.error("mail z linkiem:", error),
+    ),
   );
 
   return json({ ok: true, created: true, ...(await linkPayload(request, env, email)) });
@@ -397,30 +366,173 @@ async function sessionEmail(request, env) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Pomocnicze                                                           */
+/* Raport tygodniowy                                                    */
 /* ------------------------------------------------------------------ */
 
-async function sendMail(env, { to, subject, text, replyTo }) {
-  await env.EMAIL.send({
-    from: { name: env.MAIL_FROM_NAME, email: env.MAIL_FROM },
-    to,
-    ...(replyTo ? { replyTo } : {}),
-    subject,
-    text,
-    html: emailHtml(text),
-  });
+/**
+ * Raport z poprzedniego pełnego tygodnia (pn 00:00 – nd 24:00 czasu warszawskiego)
+ * do każdej firmy, u której coś się działo i która się nie wypisała. Po wysłanej
+ * paczce zapisujemy `report_week`, więc ponowne uruchomienie nie wyśle drugi raz.
+ */
+async function weeklyReports(env, now = Date.now()) {
+  const origin = env.PUBLIC_ORIGIN;
+  if (!origin) throw new Error("raport: brak PUBLIC_ORIGIN, nie ma z czego zbudować linków.");
+
+  const { bounds, prevStart, weekId } = previousWeek(now);
+  const [start, end] = [bounds[0], bounds[7]];
+  const dayCase = `CASE ${bounds.slice(1, 7).map((_, i) => `WHEN created_at < ? THEN ${i}`).join(" ")} ELSE 6 END`;
+
+  const [links, current, previous] = await env.DB.batch([
+    env.DB.prepare("SELECT id, email, name FROM links WHERE disabled = 0 AND weekly = 1 AND (report_week IS NULL OR report_week <> ?) ORDER BY id").bind(weekId),
+    env.DB.prepare(
+      `SELECT link_id, kind, stars, ${dayCase} AS day, COUNT(*) AS n FROM events WHERE created_at >= ? AND created_at < ? GROUP BY link_id, kind, stars, day`,
+    ).bind(...bounds.slice(1, 7), start, end),
+    env.DB.prepare("SELECT link_id, kind, COUNT(*) AS n FROM events WHERE created_at >= ? AND created_at < ? GROUP BY link_id, kind").bind(prevStart, start),
+  ]);
+
+  const stats = new Map();
+  const of = (id) => {
+    if (!stats.has(id)) {
+      stats.set(id, {
+        week: { views: 0, ratings: 0, good: 0, bad: 0, google: 0, feedback: 0 },
+        prev: { views: 0, ratings: 0, google: 0 },
+        dist: [0, 0, 0, 0, 0],
+        days: Array.from({ length: 7 }, () => ({ good: 0, bad: 0 })),
+      });
+    }
+    return stats.get(id);
+  };
+  for (const row of current.results) {
+    const s = of(row.link_id);
+    if (row.kind === "view") s.week.views += row.n;
+    if (row.kind === "google") s.week.google += row.n;
+    if (row.kind === "feedback") s.week.feedback += row.n;
+    if (row.kind === "rate" && row.stars >= 1 && row.stars <= 5) {
+      s.week.ratings += row.n;
+      s.dist[row.stars - 1] += row.n;
+      if (row.stars >= 4) {
+        s.week.good += row.n;
+        s.days[row.day].good += row.n;
+      } else {
+        s.week.bad += row.n;
+        s.days[row.day].bad += row.n;
+      }
+    }
+  }
+  for (const row of previous.results) {
+    if (!stats.has(row.link_id)) continue;
+    const s = stats.get(row.link_id);
+    if (row.kind === "view") s.prev.views += row.n;
+    if (row.kind === "rate") s.prev.ratings += row.n;
+    if (row.kind === "google") s.prev.google += row.n;
+  }
+
+  const day = new Intl.DateTimeFormat("pl-PL", { timeZone: TZ, day: "numeric", month: "long" });
+  const range = { from: day.format(start), to: day.format(end - 1) };
+  const due = links.results.filter((link) => stats.has(link.id)); // tydzień samych zer to szum, nie raport
+
+  let sent = 0;
+  for (let i = 0; i < due.length; i += RESEND_BATCH_MAX) {
+    const chunk = due.slice(i, i + RESEND_BATCH_MAX);
+    const mails = await Promise.all(
+      chunk.map(async (link) => {
+        const unsubscribeUrl = `${origin}/api/raport/wypisz?l=${link.id}&s=${await unsubscribeSig(env, link.id)}`;
+        return {
+          to: link.email,
+          tag: "weekly",
+          headers: { "List-Unsubscribe": `<${unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+          ...weeklyEmail({ origin, name: link.name, range, ...stats.get(link.id), unsubscribeUrl }),
+        };
+      }),
+    );
+    try {
+      const ids = chunk.map((link) => link.id);
+      await sendBatch(env, mails, { idempotencyKey: `weekly-${weekId}-${(await sha256(ids.join(","))).slice(0, 16)}` });
+      await env.DB.prepare(`UPDATE links SET report_week = ? WHERE id IN (${ids.map(() => "?").join(",")})`).bind(weekId, ...ids).run();
+      sent += chunk.length;
+    } catch (error) {
+      console.error(`raport ${weekId}, paczka od ${i}:`, error);
+    }
+  }
+  console.log(`raport ${weekId}: wysłane ${sent} z ${due.length} (firm z raportem: ${links.results.length})`);
 }
 
-/** Prosty szablon w barwach Design House. Bez obrazków - klienty poczty często je blokują. */
-function emailHtml(text) {
-  return `<!doctype html><html lang="pl"><body style="margin:0;padding:24px 12px;background:#f1f0ee">
-<div style="max-width:560px;margin:0 auto;overflow:hidden;border:1px solid #e8e5e1;border-radius:20px;background:#ffffff">
-<div style="padding:18px 24px;background:#111214;color:#ffffff;font:700 16px/1.2 -apple-system,Segoe UI,Arial,sans-serif;letter-spacing:.01em">Design House <span style="color:#ff6a2b">&#9679;</span> <span style="font-weight:500;color:#cfcac4">Link do opinii</span></div>
-<div style="padding:24px;font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1c1b1a;white-space:pre-wrap">${escapeHtml(text)}</div>
-</div>
-<p style="max-width:560px;margin:14px auto 0;font:12px/1.5 -apple-system,Segoe UI,Arial,sans-serif;color:#a29d97;text-align:center">Design House · <a href="https://designhouse.me" style="color:#a29d97">designhouse.me</a></p>
-</body></html>`;
+/** Granice poprzedniego tygodnia pn–nd w czasie warszawskim: 8 północy (pn … następny pn). */
+function previousWeek(now) {
+  const local = new Date(now + tzOffset(now)); // pola UTC = czas warszawski
+  const monday = local.getUTCDate() - ((local.getUTCDay() + 6) % 7);
+  const midnight = (k) => {
+    const d = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), monday + k));
+    return warsawMidnight(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  };
+  const bounds = Array.from({ length: 8 }, (_, k) => midnight(k - 7));
+  const first = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), monday - 7));
+  return { bounds, prevStart: midnight(-14), weekId: first.toISOString().slice(0, 10) };
 }
+
+/** Północ czasu warszawskiego dla daty (miesiąc od 0). Dwa kroki, bo przesunięcie zależy od chwili (zmiana czasu). */
+function warsawMidnight(y, m, d) {
+  const naive = Date.UTC(y, m, d);
+  const guess = naive - tzOffset(naive);
+  return naive - tzOffset(guess);
+}
+
+/** O ile czas warszawski wyprzedza UTC w chwili t (ms). */
+function tzOffset(t) {
+  const f = new Intl.DateTimeFormat("en-US", { timeZone: TZ, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric" });
+  const p = Object.fromEntries(f.formatToParts(t).map((x) => [x.type, Number(x.value)]));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - Math.floor(t / 1000) * 1000;
+}
+
+/**
+ * Wypis z raportów. GET pokazuje przycisk (skanery poczty otwierają linki, więc GET niczego
+ * nie zmienia), POST wypisuje - także one-click z nagłówka List-Unsubscribe-Post.
+ */
+async function unsubscribe(request, env, url) {
+  const id = String(url.searchParams.get("l") ?? "").toLowerCase();
+  const sig = String(url.searchParams.get("s") ?? "");
+  const valid = /^[a-z0-9]{3,20}$/.test(id) && timingSafeEqual(sig, await unsubscribeSig(env, id));
+  if (!valid) return page("Ten link nie działa", "Adres do wypisania jest niepełny. Skopiuj go jeszcze raz z maila z raportem.", 400);
+
+  if (request.method === "POST") {
+    await env.DB.prepare("UPDATE links SET weekly = 0 WHERE id = ?").bind(id).run();
+    return page("Wypisano z raportów", "Nie wyślemy już cotygodniowych podsumowań. Uwagi od klientów dalej będą przychodzić na Twój e-mail.");
+  }
+  if (request.method !== "GET") return page("Tylko GET albo POST", "", 405);
+  return page(
+    "Wypisać z raportów?",
+    "Przestaniemy wysyłać cotygodniowe podsumowanie. Uwagi od klientów dalej będą przychodzić na Twój e-mail.",
+    200,
+    `<form method="post"><button type="submit">Wypisz mnie z raportów</button></form>`,
+  );
+}
+
+async function unsubscribeSig(env, id) {
+  return (await sha256(`weekly:${id}:${env.HASH_PEPPER ?? "dh-opinie"}`)).slice(0, 32);
+}
+
+/** Mała strona w stylu aplikacji (wypis z raportów). Treści są stałe, bez danych od użytkownika. */
+function page(title, text, status = 200, extra = "") {
+  return new Response(
+    `<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>${title} · ReviewLink</title>
+<style>
+@font-face{font-family:Urbanist;font-weight:100 900;src:url(/mail/urbanist-latin.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:Urbanist;font-weight:100 900;src:url(/mail/urbanist-latin-ext.woff2) format("woff2");unicode-range:U+0100-02FF}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:radial-gradient(110% 52% at 8% -12%,#f8ddcc 0%,rgb(248 221 204/0) 62%),#f1f0ee;color:#1c1b1a;font-family:Urbanist,system-ui,sans-serif}
+main{max-width:460px;padding:40px 36px;border:1px solid #e8e5e1;border-radius:28px;background:#fff}
+img{display:block;height:20px;margin-bottom:28px}
+h1{margin:0;font-size:34px;font-weight:300;line-height:1.08;letter-spacing:-.02em}
+p{margin:14px 0 0;color:#6c6863;font-size:16px;line-height:1.55}
+button{margin-top:26px;padding:17px 28px;border:0;border-radius:999px;background:#ff6a2b;color:#fff;font:600 16px Urbanist,system-ui,sans-serif;cursor:pointer}
+</style></head><body><main><img src="/brand/logo-dark.svg" alt="Design House"><h1>${title}</h1>${text ? `<p>${text}</p>` : ""}${extra}</main></body></html>`,
+    { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex" } },
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Pomocnicze                                                           */
+/* ------------------------------------------------------------------ */
 
 async function turnstileOk(env, token, request) {
   if (!env.TURNSTILE_SECRET) return true;
@@ -507,10 +619,6 @@ function safeHost(value) {
 /** JSON do <script type="application/json">: każdy `<` jako \u003c, żeby nazwa firmy nie zamknęła skryptu. */
 function scriptJson(value) {
   return JSON.stringify(value).replace(/</g, "\\u003c");
-}
-
-function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 }
 
 function json(data, status = 200) {
