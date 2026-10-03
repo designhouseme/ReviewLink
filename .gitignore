@@ -1,6 +1,7 @@
 node_modules/
 .wrangler/
 .dev.vars
-design/codex-log.txt
+design/codex-log*.txt
+design/codex-wynik*.txt
 # Referencje stylu z cudzego portfolio - tylko lokalnie
 design/[1-4].png
