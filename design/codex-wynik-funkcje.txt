@@ -1,0 +1,18 @@
+Zapisano 4 nowe ilustracje PNG, 1024 × 1024, z przezroczystym tłem. Każda powstała osobnym wywołaniem generatora według podanych opisów. Pozostałych plików nie zmieniałem.
+
+Zawartość `./zrodla/`:
+
+```text
+automat-sms.png
+dzieki-google.png
+dzieki-wiadomosc.png
+fach-elektryk.png
+fach-hydraulik.png
+fach-mechanik.png
+fach-ogrodnik.png
+hero-fachowiec.png
+kod-mail.png
+kod-qr.png
+statystyki.png
+widget-strona.png
+```

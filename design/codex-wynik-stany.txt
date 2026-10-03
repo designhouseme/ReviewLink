@@ -1,0 +1,24 @@
+Zapisano cztery PNG w `./zrodla/`, po jednym wywołaniu generatora na obraz. Pozostałych plików nie zmieniałem.
+
+Ograniczenia: generator zwrócił **1254×1254** zamiast 1024×1024; `pusto-czekam.png` ma również przezroczyste wnętrza części konturów.
+
+Zawartość `./zrodla/`:
+
+```text
+automat-sms.png
+blad-link.png
+dzieki-google.png
+dzieki-wiadomosc.png
+edycja.png
+fach-elektryk.png
+fach-hydraulik.png
+fach-mechanik.png
+fach-ogrodnik.png
+gotowe-link.png
+hero-fachowiec.png
+kod-mail.png
+kod-qr.png
+pusto-czekam.png
+statystyki.png
+widget-strona.png
+```

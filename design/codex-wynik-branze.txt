@@ -1,0 +1,24 @@
+Zapisano 6 PNG 1024 × 1024 w [zrodla](/home/patryk/Programowanie/DHRewiev/design/zrodla), po jednym wywołaniu generatora na obraz. Ogrodnik i sprzątanie mają białe tło; pozostałe przezroczyste. Odstępstwo: hydraulik ma białe nogawki.
+
+Zawartość `./zrodla/`:
+
+```text
+automat-sms.png
+blad-link.png
+dzieki-google.png
+dzieki-wiadomosc.png
+edycja.png
+fach-elektryk.png
+fach-fryzjerka.png
+fach-hydraulik.png
+fach-mechanik.png
+fach-ogrodnik.png
+fach-sprzatanie.png
+gotowe-link.png
+hero-fachowiec.png
+kod-mail.png
+kod-qr.png
+pusto-czekam.png
+statystyki.png
+widget-strona.png
+```
