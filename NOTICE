@@ -16,3 +16,5 @@ tych oznaczeń poza opisem pochodzenia programu.
 Zawiera oprogramowanie innych autorów:
 - qrcode-generator, Copyright (c) 2009 Kazuhiko Arase, licencja MIT
   (public/assets/vendor/qrcode.mjs)
+- font Urbanist, Copyright 2021 The Urbanist Project Authors, SIL Open Font
+  License 1.1 (public/mail/urbanist-*.woff2), https://openfontlicense.org

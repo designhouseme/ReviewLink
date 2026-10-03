@@ -12,6 +12,7 @@
  */
 
 import { normalizeEmail, normalizeGoogleUrl, normalizeSiteUrl } from "../public/assets/links.js";
+import { galleryHtml, sampleEmails } from "./email-samples.js";
 import { codeEmail, feedbackEmail, linkReadyEmail, weeklyEmail } from "./emails.js";
 import { RESEND_BATCH_MAX, sendBatch, sendMail } from "./mailer.js";
 
@@ -43,6 +44,7 @@ export default {
         }
 
         if (pathname === "/api/config") return json({ ok: true, turnstile: env.TURNSTILE_SITE_KEY || null });
+        if (pathname.startsWith("/api/dev/maile")) return devEmails(request, env, pathname);
         if (pathname === "/api/code") return sendCode(request, env);
         if (pathname === "/api/verify") return verifyCode(request, env);
         if (pathname === "/api/link") return request.method === "PUT" ? saveLink(request, env, ctx) : getLink(request, env);
@@ -528,6 +530,21 @@ button{margin-top:26px;padding:17px 28px;border:0;border-radius:999px;background
 </style></head><body><main><img src="/brand/logo-dark.svg" alt="Design House"><h1>${title}</h1>${text ? `<p>${text}</p>` : ""}${extra}</main></body></html>`,
     { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex" } },
   );
+}
+
+/**
+ * Podgląd maili dla dewelopera: /api/dev/maile (galeria) i /api/dev/maile/:id (sam mail).
+ * Tylko z DEV_SHOW_CODE=1, czyli lokalnie; na produkcji to zwykłe 404.
+ */
+function devEmails(request, env, pathname) {
+  if (env.DEV_SHOW_CODE !== "1") return json({ ok: false, error: "Nie ma takiego adresu." }, 404);
+  const origin = publicOrigin(request, env);
+  const samples = sampleEmails(origin);
+  const html = (body) => new Response(body, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+  const id = pathname.replace(/^\/api\/dev\/maile\/?/, "");
+  if (!id) return html(galleryHtml(samples, (sample) => `/api/dev/maile/${sample}`, origin));
+  const sample = samples.find((s) => s.id === id);
+  return sample ? html(sample.mail.html) : json({ ok: false, error: "Nie ma takiego maila." }, 404);
 }
 
 /* ------------------------------------------------------------------ */

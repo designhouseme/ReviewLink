@@ -49,7 +49,7 @@ Gotowe. Dostajesz stały link, na przykład `/o/k3x9ab`.
 | **Twój link** | Przyciski Kopiuj i Udostępnij. Link wysyłasz sam: SMS-em, mailem albo na komunikatorze. |
 | **Kod QR** | PNG, SVG do druku albo gotowa karta A6 z nazwą firmy i gwiazdkami. Na fakturę, wizytówkę albo auto. |
 | **Gotowa wiadomość** | Tekst do wklejenia w SMS-ie po zleceniu. |
-| **Statystyki** | Wejścia, przejścia do Google i uwagi z ostatnich 7 dni. Wkrótce także raport raz w tygodniu na e-mail. |
+| **Statystyki** | Wejścia, przejścia do Google i uwagi z ostatnich 7 dni w panelu. W poniedziałek rano podsumowanie tygodnia przychodzi też na e-mail. |
 | **Podgląd** | Telefon obok formularza pokazuje na żywo to, co zobaczy klient. |
 
 Zmiana danych nie zmienia linku, więc wysłane wcześniej linki i wydrukowane kody QR dalej działają.
