@@ -1,0 +1,18 @@
+ReviewLink
+Copyright 2026 Design House (https://designhouse.me)
+
+This product includes software developed by Design House
+(https://designhouse.me).
+
+Ten program stworzyło Design House (https://designhouse.me). Zgodnie z sekcją 4
+licencji Apache 2.0 każda kopia i każda wersja zmieniona musi zachować ten plik
+NOTICE razem z informacją o autorstwie Design House.
+
+Nazwy „Design House” i „ReviewLink” oraz znak i logo Design House (pliki
+w public/brand/, public/favicon.svg, public/favicon.ico, public/apple-touch-icon.png)
+nie są objęte licencją. Zgodnie z sekcją 6 licencja nie daje prawa do używania
+tych oznaczeń poza opisem pochodzenia programu.
+
+Zawiera oprogramowanie innych autorów:
+- qrcode-generator, Copyright (c) 2009 Kazuhiko Arase, licencja MIT
+  (public/assets/vendor/qrcode.mjs)

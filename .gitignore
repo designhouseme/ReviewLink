@@ -4,3 +4,6 @@ node_modules/
 design/codex-log*.txt
 # Referencje stylu z cudzego portfolio - tylko lokalnie
 design/[1-4].png
+# Render showreela (klatki, MP4, WAV) - generowany lokalnie
+design/showreel/out/
+design/
