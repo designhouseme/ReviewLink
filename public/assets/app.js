@@ -546,7 +546,9 @@ function setPreviewScreen(screen) {
 document.querySelectorAll("[data-preview]").forEach((tab) => tab.addEventListener("click", () => setPreviewScreen(tab.dataset.preview)));
 
 window.addEventListener("message", (event) => {
-  if (event.origin === location.origin && event.data?.type === "dh-preview-ready") postPreview(true);
+  if (event.origin !== location.origin || event.data?.type !== "dh-preview-ready") return;
+  postPreview(true);
+  bindFrameParallax();
 });
 
 function fitPhone() {
@@ -571,6 +573,52 @@ function closePreview() {
   $("stage").classList.remove("open");
   document.body.style.overflow = "";
 }
+
+/* Paralaksa: tło jedzie lekko przeciwnie do kursora, telefon odrobinę za nim.
+   Tylko z myszką i bez „ogranicz ruch”; ruch wygładzany w requestAnimationFrame. */
+const stage = $("stage");
+const motionOk = matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+const parallax = { tx: 0, ty: 0, x: 0, y: 0, frame: 0 };
+
+function parallaxStep() {
+  parallax.x += (parallax.tx - parallax.x) * 0.07;
+  parallax.y += (parallax.ty - parallax.y) * 0.07;
+  stage.style.setProperty("--bg-x", `${(-parallax.x * 24).toFixed(2)}px`);
+  stage.style.setProperty("--bg-y", `${(-parallax.y * 18).toFixed(2)}px`);
+  stage.style.setProperty("--phone-x", `${(parallax.x * 7).toFixed(2)}px`);
+  stage.style.setProperty("--phone-y", `${(parallax.y * 5).toFixed(2)}px`);
+  const moving = Math.abs(parallax.tx - parallax.x) + Math.abs(parallax.ty - parallax.y) > 0.002;
+  parallax.frame = moving ? requestAnimationFrame(parallaxStep) : 0;
+}
+
+function aimParallax(x, y) {
+  parallax.tx = Math.max(-1, Math.min(1, x));
+  parallax.ty = Math.max(-1, Math.min(1, y));
+  if (!parallax.frame) parallax.frame = requestAnimationFrame(parallaxStep);
+}
+
+function followPointer(clientX, clientY) {
+  if (!motionOk.matches || !stage.offsetParent) return;
+  const box = stage.getBoundingClientRect();
+  aimParallax((clientX - box.left - box.width / 2) / (box.width / 2), (clientY - box.top - box.height / 2) / (box.height / 2));
+}
+
+window.addEventListener("pointermove", (event) => event.pointerType === "mouse" && followPointer(event.clientX, event.clientY));
+document.documentElement.addEventListener("mouseleave", () => aimParallax(0, 0));
+
+// Nad telefonem kursor jest w iframe (ta sama domena) - przeliczamy jego współrzędne na stronę.
+function bindFrameParallax() {
+  const inner = frame.contentWindow;
+  if (!inner || inner.dhParallax) return;
+  inner.dhParallax = true;
+  inner.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "mouse") return;
+    const box = frame.getBoundingClientRect();
+    const scale = box.width / frame.offsetWidth;
+    followPointer(box.left + event.clientX * scale, box.top + event.clientY * scale);
+  });
+}
+frame.addEventListener("load", bindFrameParallax);
 
 $("stage-close").addEventListener("click", closePreview);
 document.addEventListener("keydown", (event) => event.key === "Escape" && closePreview());

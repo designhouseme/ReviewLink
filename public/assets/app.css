@@ -1070,7 +1070,8 @@
 /* ---------------------------------------------------------------- */
 
 /* Tło od Codexa: kostki ze znaku Design House na brzegach, pusty środek pod telefon.
-   Wersja ciemna leży obok (/img/tlo-ciemne.webp) - wtedy chip i zakładki na jasno. */
+   Wersja ciemna leży obok (/img/tlo-ciemne.webp). Tło to osobna warstwa
+   z zapasem na brzegach, żeby paralaksa (app.js) nie odsłaniała krawędzi. */
 .stage {
   position: relative;
   display: none;
@@ -1080,27 +1081,22 @@
   gap: 18px;
   overflow: hidden;
   padding: 24px;
-  background: url("/img/tlo-jasne.webp") center / cover no-repeat, #f1f0ee;
+  background: #f1f0ee;
   color: var(--ink);
 }
 
-.stage-logo {
+.stage-bg {
   position: absolute;
-  top: 30px;
-  left: 32px;
-  display: none;
-  opacity: 0.85;
-  transition: opacity 0.15s;
+  inset: -36px;
+  background: url("/img/tlo-jasne.webp") center / cover no-repeat;
+  transform: translate3d(var(--bg-x, 0px), var(--bg-y, 0px), 0);
+  will-change: transform;
+  pointer-events: none;
 }
 
-.stage-logo:hover {
-  opacity: 1;
-}
-
-.stage-logo img {
-  display: block;
-  width: auto;
-  height: 17px;
+.stage > :not(.stage-bg) {
+  position: relative;
+  z-index: 1;
 }
 
 .stage-top {
@@ -1135,6 +1131,7 @@
 .phone-wrap {
   --s: 0.78;
   position: relative;
+  translate: var(--phone-x, 0px) var(--phone-y, 0px);
   width: calc(412px * var(--s));
   height: calc(866px * var(--s));
   flex: none;
@@ -1307,9 +1304,6 @@
     border-radius: 36px;
   }
 
-  .stage-logo {
-    display: block;
-  }
 
   .preview-btn {
     display: none;
