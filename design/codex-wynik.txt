@@ -1,0 +1,9 @@
+Generated all four PNGs and saved them at 1024×1024 with transparency. No other project files changed.
+
+```text
+./public/img/
+├── dzieki-google.png
+├── dzieki-wiadomosc.png
+├── hero-fachowiec.png
+└── kod-mail.png
+```

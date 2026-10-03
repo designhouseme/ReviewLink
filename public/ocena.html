@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f1f0ee" />
+    <title>Oceń naszą pracę</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/assets/base.css" />
+    <link rel="stylesheet" href="/assets/ocena.css" />
+  </head>
+  <body>
+    <!-- Dane linku wstawia Worker (HTMLRewriter). W podglądzie (?podglad=1) przychodzą przez postMessage. -->
+    <script id="cfg" type="application/json">null</script>
+
+    <main class="app" id="app">
+      <!-- 1. Gwiazdki -->
+      <section class="screen s-rate" id="s-rate" aria-labelledby="rate-title">
+        <header class="top">
+          <span class="badge" id="badge" aria-hidden="true">·</span>
+          <div class="who">
+            <span class="kicker">Ocena współpracy</span>
+            <strong class="company" data-company>Twoja firma</strong>
+          </div>
+        </header>
+
+        <h1 class="title" id="rate-title">Jak oceniasz naszą pracę?</h1>
+
+        <img class="art art-desktop" src="/img/dzieki-google.webp" alt="" width="760" height="742" />
+
+        <div class="card rate-card grow">
+          <div class="score" aria-live="polite">
+            <p class="score-num"><span id="score-num">0</span><small>/5</small></p>
+            <p class="score-label" id="score-label">Dotknij gwiazdki</p>
+          </div>
+          <div class="ticks" id="ticks" aria-hidden="true"></div>
+          <fieldset class="stars" id="stars">
+            <legend class="sr">Twoja ocena w skali od 1 do 5</legend>
+          </fieldset>
+        </div>
+
+        <div class="bottom">
+          <a class="cta" id="rate-cta" role="button" aria-disabled="true" href="#">
+            <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#star" /></svg></span>
+            <span id="rate-cta-label">Wybierz ocenę</span>
+            <svg class="i cta-arrow"><use href="/assets/icons.svg#chevrons" /></svg>
+          </a>
+          <p class="foot"><a href="/" target="_blank" rel="noopener">Link do opinii · Design House</a></p>
+        </div>
+      </section>
+
+      <!-- 2. Niska ocena: uwagi prosto do firmy -->
+      <section class="screen s-low" id="s-low" aria-labelledby="low-title" hidden>
+        <header class="top">
+          <button class="icon-btn" type="button" data-back aria-label="Wróć do gwiazdek">
+            <svg class="i"><use href="/assets/icons.svg#arrow-left" /></svg>
+          </button>
+          <span class="spacer"></span>
+          <span class="rating-chip" id="low-chip"></span>
+        </header>
+
+        <h1 class="title" id="low-title">Co możemy poprawić?</h1>
+        <p class="sub" id="low-sub">Wiadomość trafi prosto do firmy. Nie publikujemy jej nigdzie.</p>
+
+        <img class="art art-desktop" src="/img/dzieki-wiadomosc.webp" alt="" width="691" height="760" />
+
+        <form class="card note-card grow" id="note-form" novalidate>
+          <label class="field note-field">
+            <span class="sr">Twoja wiadomość</span>
+            <textarea class="input note-text" name="message" id="note-text" placeholder="Napisz, co poszło nie tak albo co zrobić lepiej…" maxlength="4000" required></textarea>
+          </label>
+          <div class="note-row">
+            <label class="field">
+              <span class="sr">Imię</span>
+              <input class="input" name="name" autocomplete="given-name" placeholder="Imię (opcjonalnie)" maxlength="120" />
+            </label>
+            <label class="field">
+              <span class="sr">Telefon lub e-mail</span>
+              <input class="input" name="contact" autocomplete="email" placeholder="Telefon lub e-mail" maxlength="160" />
+            </label>
+          </div>
+          <input class="trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="turnstile" id="turnstile"></div>
+          <p class="hint is-err" id="note-error" role="alert" hidden></p>
+        </form>
+
+        <!-- Uwagi na stronie firmy (zamiast pola tekstowego) -->
+        <div class="card site-card grow" id="site-card" hidden>
+          <span class="site-icon"><svg class="i"><use href="/assets/icons.svg#globe" /></svg></span>
+          <p class="site-text">Uwagi zbieramy na naszej stronie. Otworzy się w nowej karcie.</p>
+          <span class="site-host" id="site-host"></span>
+        </div>
+
+        <div class="bottom">
+          <button class="cta" type="submit" form="note-form" id="note-cta">
+            <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#send" /></svg></span>
+            <span>Wyślij wiadomość</span>
+          </button>
+          <a class="cta" id="site-cta" target="_blank" rel="noopener" href="#" hidden>
+            <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#globe" /></svg></span>
+            <span id="site-cta-label">Przejdź do strony</span>
+            <svg class="i cta-arrow"><use href="/assets/icons.svg#arrow-up-right" /></svg>
+          </a>
+          <!-- Regulamin Google: nie wolno ukrywać publicznej opinii przed niezadowolonymi klientami. -->
+          <a class="text-link public-link" id="public-link" target="_blank" rel="noopener" href="#" data-soft-gate>
+            Wolisz napisać publicznie? Opinia w Google
+            <svg class="i"><use href="/assets/icons.svg#arrow-up-right" /></svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- 3a. Dzięki - poszedł do Google -->
+      <section class="screen s-thanks" id="s-google" aria-labelledby="google-title" hidden>
+        <header class="top">
+          <button class="icon-btn" type="button" data-back aria-label="Wróć do gwiazdek">
+            <svg class="i"><use href="/assets/icons.svg#arrow-left" /></svg>
+          </button>
+        </header>
+        <div class="thanks-art grow"><img src="/img/dzieki-google.webp" alt="" width="760" height="742" /></div>
+        <div class="thanks-text">
+          <h1 class="title" id="google-title">Dziękujemy!</h1>
+          <p class="sub" id="google-sub">Google otworzył się w nowej karcie. Zaznacz tam gwiazdki i dodaj zdanie od siebie, to bardzo pomaga.</p>
+        </div>
+        <div class="bottom">
+          <a class="cta cta-ghost" id="google-again" target="_blank" rel="noopener" href="#">
+            <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#pin" /></svg></span>
+            <span>Otwórz Google ponownie</span>
+            <svg class="i cta-arrow"><use href="/assets/icons.svg#arrow-up-right" /></svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- 3b. Dzięki - wiadomość wysłana -->
+      <section class="screen s-thanks" id="s-sent" aria-labelledby="sent-title" hidden>
+        <header class="top"></header>
+        <div class="thanks-art grow"><img src="/img/dzieki-wiadomosc.webp" alt="" width="691" height="760" /></div>
+        <div class="thanks-text">
+          <h1 class="title" id="sent-title">Wiadomość wysłana</h1>
+          <p class="sub" id="sent-sub">Dziękujemy, że dajesz znać. Firma dostała ją na maila.</p>
+        </div>
+        <div class="bottom">
+          <p class="foot"><a href="/" target="_blank" rel="noopener">Link do opinii · Design House</a></p>
+        </div>
+      </section>
+
+      <!-- Link nie istnieje albo jest wyłączony -->
+      <section class="screen s-thanks" id="s-missing" aria-labelledby="missing-title" hidden>
+        <header class="top"></header>
+        <div class="missing-mark grow" aria-hidden="true">
+          <span><svg class="i"><use href="/assets/icons.svg#link" /></svg></span>
+        </div>
+        <div class="thanks-text">
+          <h1 class="title" id="missing-title">Ten link nie działa</h1>
+          <p class="sub">Mógł zostać wyłączony albo skopiował się z błędem. Poproś firmę o nowy.</p>
+        </div>
+        <div class="bottom">
+          <a class="cta cta-ghost" href="/">
+            <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#sparkle" /></svg></span>
+            <span>Zrób link dla swojej firmy</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/assets/ocena.js"></script>
+  </body>
+</html>

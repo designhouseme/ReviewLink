@@ -1,0 +1,51 @@
+/**
+ * Link do opinii - osobne narzędzie Design House.
+ *
+ * Statyczne pliki z `public/` (generator, szablon strony oceny, grafiki) plus
+ * Worker, który obsługuje tylko `/api/*` i strony oceny `/o/:id`.
+ * Dane: D1 (linki, jednorazowe kody, sesje, zdarzenia do statystyk).
+ * Maile: Cloudflare Email Sending - kody, gotowy link i uwagi od klientów.
+ *
+ * Lokalnie: `npm run db:local && npm run db:seed && npm run dev`.
+ */
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dh-opinie",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-30",
+
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public",
+    "run_worker_first": ["/api/*", "/o/*"],
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+
+  // Baza w regionie EEUR. Lokalnie `wrangler dev` używa SQLite w `.wrangler/state`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dh-opinie",
+      "database_id": "a5d0ee31-1b3d-4861-b40c-3db51cab7a7f",
+      "migrations_dir": "./migrations"
+    }
+  ],
+
+  // Bez `remote: true`: lokalnie maile są tylko symulowane (zapis do pliku
+  // .eml), żeby testy nie wysyłały prawdziwych wiadomości. Przed startem
+  // sprawdzić, czy Email Sending na koncie wysyła na dowolny adres - kody
+  // i uwagi idą do firm, nie tylko do Macieja.
+  "send_email": [{ "name": "EMAIL" }],
+
+  "vars": {
+    "MAIL_FROM": "kontakt@designhouse.me",
+    "MAIL_FROM_NAME": "Design House · Link do opinii",
+    "CONTACT_URL": "https://designhouse.me/kontakt"
+  },
+
+  // Na razie tylko adres testowy: dh-opinie.maciej-36d.workers.dev.
+  "workers_dev": true,
+
+  "observability": { "enabled": true }
+}

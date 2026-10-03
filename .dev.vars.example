@@ -1,0 +1,3 @@
+# Skopiuj do .dev.vars (plik jest w .gitignore).
+# DEV_SHOW_CODE=1 pokazuje kod weryfikacyjny na stronie - nigdy nie ustawiaj go na produkcji.
+DEV_SHOW_CODE=1

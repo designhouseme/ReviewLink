@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f1f0ee" />
+    <title>Link do opinii Google za darmo · Design House</title>
+    <meta name="description" content="Jeden link dla wszystkich klientów. Zadowoleni trafiają prosto do opinii w Google, a uwagi przychodzą do Ciebie na maila. Za darmo, bez konta." />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/assets/base.css" />
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <main class="flow" id="flow">
+        <!-- Start -->
+        <section class="screen s-start" id="start" aria-labelledby="start-title">
+          <header class="top">
+            <a class="brand" href="/" aria-label="Link do opinii, Design House">
+              <span class="brand-mark"><svg class="i"><use href="/assets/icons.svg#star" /></svg></span>
+              <span class="brand-text"><strong>Link do opinii</strong><small>Design House</small></span>
+            </a>
+            <span class="spacer"></span>
+            <button class="chip-btn" type="button" data-go="login">
+              <svg class="i"><use href="/assets/icons.svg#key" /></svg>Mam już link
+            </button>
+          </header>
+
+          <div class="start-head">
+            <h1 class="title" id="start-title">Zadowoleni klienci do&nbsp;Google, uwagi do&nbsp;Ciebie</h1>
+            <p class="sub">Po zleceniu wysyłasz klientowi jeden link. Klient klika gwiazdki, a my kierujemy go dalej.</p>
+          </div>
+
+          <div class="hero-art grow">
+            <img src="/img/hero-fachowiec.webp" alt="" width="590" height="760" />
+            <span class="float float-good"><b>4–5 <svg class="i"><use href="/assets/icons.svg#star" /></svg></b> opinia w Google</span>
+            <span class="float float-bad"><b>1–3 <svg class="i"><use href="/assets/icons.svg#star" /></svg></b> wiadomość do Ciebie</span>
+          </div>
+
+          <ul class="facts">
+            <li><strong>2 min</strong><span>do gotowego linku</span></li>
+            <li><strong>0 zł</strong><span>bez abonamentu</span></li>
+            <li><strong>1 link</strong><span>dla wszystkich klientów</span></li>
+          </ul>
+
+          <div class="bottom">
+            <button class="cta" type="button" data-go="firma">
+              <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#bolt" /></svg></span>
+              <span>Zrób swój link</span>
+              <svg class="i cta-arrow"><use href="/assets/icons.svg#chevrons" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Krok 1: firma -->
+        <section class="screen s-step" id="firma" aria-labelledby="firma-title" hidden>
+          <header class="top" data-steps="firma"></header>
+          <h1 class="title" id="firma-title">Twoja firma</h1>
+          <p class="sub">Tak przedstawimy Cię klientowi na stronie z gwiazdkami.</p>
+
+          <form class="card form-card grow" id="firma-form" novalidate>
+            <label class="field">
+              <span>Nazwa firmy</span>
+              <input class="input" name="name" id="f-name" autocomplete="organization" placeholder="np. MIREC Usługi Remontowe" maxlength="80" required />
+            </label>
+            <label class="field">
+              <span>Link do opinii w Google</span>
+              <input class="input" name="google" id="f-google" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="g.page/r/…/review" required />
+            </label>
+            <p class="hint" id="google-hint">
+              <svg class="i"><use href="/assets/icons.svg#help" /></svg>
+              <span>Najlepiej link z przycisku „Poproś o opinie”, bo otwiera od razu okno oceny.</span>
+            </p>
+            <div class="mini-preview" aria-hidden="true">
+              <span class="mini-badge" id="mini-badge">·</span>
+              <span class="mini-text">
+                <small>Tak zobaczy Cię klient</small>
+                <strong id="mini-name">Twoja firma</strong>
+              </span>
+              <span class="mini-stars"><svg class="i"><use href="/assets/icons.svg#star" /></svg><svg class="i"><use href="/assets/icons.svg#star" /></svg><svg class="i"><use href="/assets/icons.svg#star" /></svg><svg class="i"><use href="/assets/icons.svg#star" /></svg><svg class="i"><use href="/assets/icons.svg#star" /></svg></span>
+            </div>
+            <details class="howto">
+              <summary>Skąd wziąć ten link?</summary>
+              <ol>
+                <li>Wpisz w Google nazwę swojej firmy, będąc zalogowanym na konto, które nią zarządza.</li>
+                <li>W panelu firmy kliknij <b>„Poproś o opinie”</b> albo <b>„Zbieraj więcej opinii”</b>.</li>
+                <li>Skopiuj link (wygląda jak <code>g.page/r/…/review</code>) i wklej go tutaj.</li>
+              </ol>
+            </details>
+            <p class="hint is-err" data-error hidden></p>
+          </form>
+
+          <div class="bottom">
+            <button class="cta" type="submit" form="firma-form">
+              <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#store" /></svg></span>
+              <span>Dalej</span>
+              <svg class="i cta-arrow"><use href="/assets/icons.svg#chevrons" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Krok 2: gdzie uwagi -->
+        <section class="screen s-step" id="uwagi" aria-labelledby="uwagi-title" hidden>
+          <header class="top" data-steps="uwagi"></header>
+          <h1 class="title" id="uwagi-title">Gdzie mają trafiać uwagi?</h1>
+          <p class="sub">Gdy klient da 1–3 gwiazdki, zamiast Google zobaczy najpierw miejsce na wiadomość do Ciebie.</p>
+
+          <form class="options grow" id="uwagi-form" novalidate>
+            <label class="option">
+              <input type="radio" name="feedbackMode" value="email" checked />
+              <span class="option-icon"><svg class="i"><use href="/assets/icons.svg#mail" /></svg></span>
+              <span class="option-text">
+                <strong>Na mój e-mail</strong>
+                <span>Klient pisze na naszej stronie, a my przesyłamy Ci wiadomość. Najprostsze.</span>
+              </span>
+              <span class="option-check"><svg class="i"><use href="/assets/icons.svg#check" /></svg></span>
+            </label>
+            <label class="option">
+              <input type="radio" name="feedbackMode" value="url" />
+              <span class="option-icon"><svg class="i"><use href="/assets/icons.svg#globe" /></svg></span>
+              <span class="option-text">
+                <strong>Na moją stronę</strong>
+                <span>Klient przechodzi do Twojego formularza kontaktowego.</span>
+              </span>
+              <span class="option-check"><svg class="i"><use href="/assets/icons.svg#check" /></svg></span>
+            </label>
+            <label class="field site-field" id="site-field" hidden>
+              <span>Adres strony z formularzem</span>
+              <input class="input" name="feedbackUrl" id="f-site" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="twojafirma.pl/kontakt" />
+            </label>
+            <p class="hint is-err" data-error hidden></p>
+            <p class="hint note">
+              <svg class="i"><use href="/assets/icons.svg#help" /></svg>
+              <span>Niezadowolony klient zobaczy też mały link do Google. Tego wymaga regulamin Google.</span>
+            </p>
+          </form>
+
+          <div class="bottom">
+            <button class="cta" type="submit" form="uwagi-form" id="uwagi-cta">
+              <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#message" /></svg></span>
+              <span>Dalej</span>
+              <svg class="i cta-arrow"><use href="/assets/icons.svg#chevrons" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Krok 3: e-mail i kod (także logowanie „Mam już link”) -->
+        <section class="screen s-step" id="email" aria-labelledby="email-title" hidden>
+          <header class="top" data-steps="email"></header>
+          <h1 class="title" id="email-title">Potwierdź e-mail</h1>
+          <p class="sub" id="email-sub">Na ten adres przyjdą uwagi od klientów i Twój link. Hasła nie ma, za każdym razem wyślemy kod.</p>
+
+          <form class="card form-card code-card grow" id="email-form" novalidate>
+            <div class="code-art"><img src="/img/kod-mail.webp" alt="" width="621" height="760" /></div>
+
+            <div class="code-ask" id="code-ask">
+              <label class="field">
+                <span>Twój e-mail</span>
+                <input class="input" type="email" name="email" id="f-email" autocomplete="email" inputmode="email" placeholder="biuro@twojafirma.pl" maxlength="200" required />
+              </label>
+              <label class="check" id="marketing-row">
+                <input type="checkbox" name="marketing" id="f-marketing" />
+                <span class="box"><svg class="i"><use href="/assets/icons.svg#check" /></svg></span>
+                <span>Możecie się odezwać z ofertą automatycznej wysyłki linku (opcjonalnie).</span>
+              </label>
+              <div class="turnstile" id="turnstile"></div>
+            </div>
+
+            <div class="code-enter" id="code-enter" hidden>
+              <p class="code-sent">Wysłaliśmy kod na <b id="code-email"></b></p>
+              <label class="otp">
+                <span class="sr">Kod z maila (6 cyfr)</span>
+                <input id="f-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" />
+                <span class="otp-boxes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              </label>
+              <p class="code-actions">
+                <button class="text-link" type="button" id="change-email">Zmień adres</button>
+                <button class="text-link" type="button" id="resend" disabled>Wyślij ponownie</button>
+              </p>
+              <p class="dev-code" id="dev-code" hidden></p>
+            </div>
+
+            <p class="hint is-err" data-error hidden></p>
+          </form>
+
+          <div class="bottom">
+            <button class="cta" type="submit" form="email-form" id="email-cta">
+              <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#mail" /></svg></span>
+              <span id="email-cta-label">Wyślij kod</span>
+              <svg class="i cta-arrow"><use href="/assets/icons.svg#chevrons" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- Panel: gotowy link, wiadomość do klienta, statystyki -->
+        <section class="screen s-panel" id="panel" aria-labelledby="panel-title" hidden>
+          <header class="top">
+            <a class="brand" href="/" aria-label="Link do opinii, Design House">
+              <span class="brand-mark"><svg class="i"><use href="/assets/icons.svg#star" /></svg></span>
+              <span class="brand-text"><strong>Link do opinii</strong><small>Design House</small></span>
+            </a>
+            <span class="spacer"></span>
+            <button class="icon-btn" type="button" data-go="firma" aria-label="Zmień dane">
+              <svg class="i"><use href="/assets/icons.svg#pencil" /></svg>
+            </button>
+            <button class="icon-btn" type="button" id="logout" aria-label="Wyloguj">
+              <svg class="i"><use href="/assets/icons.svg#logout" /></svg>
+            </button>
+          </header>
+
+          <div class="panel-head">
+            <span class="kicker" id="panel-kicker">Twój link</span>
+            <h1 class="title" id="panel-title">Gotowe!</h1>
+          </div>
+
+          <div class="link-card">
+            <span class="link-label"><svg class="i"><use href="/assets/icons.svg#link" /></svg><span id="panel-name"></span></span>
+            <a class="link-url" id="panel-url" target="_blank" rel="noopener" href="#"></a>
+            <div class="link-actions">
+              <button class="pill-orange" type="button" id="copy-link">
+                <svg class="i"><use href="/assets/icons.svg#copy" /></svg><span>Kopiuj link</span>
+              </button>
+              <button class="pill-line" type="button" id="share-link">
+                <svg class="i"><use href="/assets/icons.svg#share" /></svg><span>Udostępnij</span>
+              </button>
+              <a class="round-line" id="open-link" target="_blank" rel="noopener" href="#" aria-label="Otwórz link">
+                <svg class="i"><use href="/assets/icons.svg#arrow-up-right" /></svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="card msg-card">
+            <div class="card-head">
+              <span class="card-icon"><svg class="i"><use href="/assets/icons.svg#message" /></svg></span>
+              <div>
+                <strong>Wiadomość do klienta</strong>
+                <span>Wyślij SMS-em albo na WhatsAppie po zleceniu</span>
+              </div>
+              <button class="icon-btn" type="button" id="copy-msg" aria-label="Kopiuj wiadomość">
+                <svg class="i"><use href="/assets/icons.svg#copy" /></svg>
+              </button>
+            </div>
+            <textarea class="msg-text" id="msg-text" rows="4" aria-label="Treść wiadomości do klienta"></textarea>
+          </div>
+
+          <div class="card stats-card">
+            <div class="card-head">
+              <span class="card-icon"><svg class="i"><use href="/assets/icons.svg#chart" /></svg></span>
+              <div>
+                <strong>Ostatnie 7 dni</strong>
+                <span id="stats-note">Liczymy wejścia i oceny, bez danych klientów</span>
+              </div>
+            </div>
+            <div class="stats-nums">
+              <p><strong id="st-views">0</strong><span>wejść</span></p>
+              <p><strong id="st-google">0</strong><span>do Google</span></p>
+              <p><strong id="st-feedback">0</strong><span>uwag do Ciebie</span></p>
+            </div>
+            <div class="bars" id="bars" aria-hidden="true"></div>
+            <p class="bars-legend"><span class="lg-good">4–5 gwiazdek</span><span class="lg-bad">1–3 gwiazdki</span></p>
+          </div>
+
+          <div class="upsell">
+            <span class="kicker">Dla firm z dużą liczbą zleceń</span>
+            <h2>Link może iść do klientów sam</h2>
+            <p>Podepniemy go pod kalendarz, CRM albo fakturowanie. Po każdym zakończonym zleceniu klient dostanie SMS, a Ty nie musisz o tym pamiętać.</p>
+            <a class="cta" href="https://designhouse.me/kontakt" target="_blank" rel="noopener">
+              <span class="cta-icon"><svg class="i"><use href="/assets/icons.svg#sparkle" /></svg></span>
+              <span>Porozmawiajmy</span>
+              <svg class="i cta-arrow"><use href="/assets/icons.svg#arrow-up-right" /></svg>
+            </a>
+          </div>
+
+          <p class="panel-foot">Zmiana danych nie zmienia adresu linku. Wysłane wcześniej linki dalej działają.</p>
+        </section>
+      </main>
+
+      <!-- Podgląd na żywo: obok formularza na desktopie, po kliknięciu „oka” na telefonie -->
+      <aside class="stage" id="stage" aria-label="Podgląd strony dla klienta">
+        <span class="stage-word" aria-hidden="true">opinie</span>
+        <div class="stage-top">
+          <span class="stage-chip"><svg class="i"><use href="/assets/icons.svg#eye" /></svg>Tak zobaczy to klient</span>
+          <button class="icon-btn stage-close" type="button" id="stage-close" aria-label="Zamknij podgląd">
+            <svg class="i"><use href="/assets/icons.svg#close" /></svg>
+          </button>
+        </div>
+        <div class="phone-wrap" id="phone-wrap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="phone-status" aria-hidden="true">
+                <span>9:41</span><i class="island"></i><span class="status-icons"><b></b><b></b><b></b></span>
+              </div>
+              <iframe id="preview" src="/ocena?podglad=1" title="Podgląd strony oceny" tabindex="-1"></iframe>
+            </div>
+          </div>
+        </div>
+        <div class="stage-tabs" role="tablist" aria-label="Który ekran pokazać">
+          <button type="button" role="tab" data-preview="s-rate" aria-selected="true">Gwiazdki</button>
+          <button type="button" role="tab" data-preview="s-low" aria-selected="false">1–3 gwiazdki</button>
+          <button type="button" role="tab" data-preview="s-google" aria-selected="false">4–5 gwiazdek</button>
+        </div>
+      </aside>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>

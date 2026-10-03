@@ -1,0 +1,487 @@
+/*
+ * Wspólne tokeny i komponenty: generator (index.html) i strona oceny (ocena.html).
+ * Kierunek: jasne, ciepłe tło z brzoskwiniową poświatą u góry, białe karty
+ * z cienką linią zamiast cieni, jeden pomarańcz, prawie czarne pigułki,
+ * Urbanist w lekkich wagach i duże, cienkie cyfry.
+ */
+
+:root {
+  --bg: #f1f0ee;
+  --wash: #f8ddcc;
+  --surface: #ffffff;
+  --surface-2: #f6f5f3;
+  --ink: #1c1b1a;
+  --ink-2: #6c6863;
+  --ink-3: #a29d97;
+  --line: #e8e5e1;
+  --line-2: #d8d3cd;
+  --orange: #ff6a2b;
+  --orange-press: #ec5717;
+  --orange-soft: #ffeadf;
+  --dark: #222120;
+  --ok: #23874c;
+  --err: #cf3b25;
+
+  --r-card: 28px;
+  --r-field: 18px;
+  --gutter: 16px;
+  --font: "Urbanist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(110% 52% at 8% -12%, var(--wash) 0%, rgb(248 221 204 / 0) 62%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+}
+
+/* Ikony z /assets/icons.svg - styl linii ustawiamy tutaj, bo <use> nie dziedziczy go z pliku. */
+.i {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------------------------------------------------------------- */
+/* Ekran: pełna wysokość telefonu, przyciski na dole przy kciuku.     */
+/* ---------------------------------------------------------------- */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100dvh;
+  padding: max(var(--gutter), env(safe-area-inset-top)) var(--gutter) max(var(--gutter), env(safe-area-inset-bottom));
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.top .spacer {
+  flex: 1;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(30px, 8.6vw, 44px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.sub {
+  margin: -4px 0 0;
+  max-width: 36ch;
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.kicker {
+  display: block;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.grow {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------------------------------------------------------------- */
+/* Przyciski                                                          */
+/* ---------------------------------------------------------------- */
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+@media (hover: hover) {
+  .icon-btn:hover {
+    border-color: var(--line-2);
+  }
+
+  .cta:hover {
+    background: var(--orange-press);
+  }
+
+  .cta-ghost:hover {
+    background: var(--surface);
+    border-color: var(--line-2);
+  }
+}
+
+.icon-btn:active {
+  transform: scale(0.94);
+}
+
+.icon-btn .i {
+  width: 20px;
+  height: 20px;
+}
+
+/* Główny przycisk: pomarańczowa pigułka z kółkiem na ikonę po lewej, jak w referencji. */
+.cta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 60px;
+  padding: 6px 64px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 10px 24px -14px rgb(255 106 43 / 0.9);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.cta:active {
+  transform: scale(0.985);
+}
+
+.cta-icon {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.2);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+}
+
+.cta-icon .i {
+  width: 21px;
+  height: 21px;
+}
+
+.cta-arrow {
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
+}
+
+.cta[aria-disabled="true"],
+.cta:disabled {
+  background: #e6e2dd;
+  color: var(--ink-3);
+  box-shadow: none;
+  cursor: default;
+  transform: none;
+}
+
+.cta[aria-disabled="true"] .cta-icon,
+.cta:disabled .cta-icon {
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: none;
+}
+
+.cta.is-busy {
+  pointer-events: none;
+}
+
+.cta.is-busy .cta-icon .i {
+  animation: spin 0.9s linear infinite;
+}
+
+.cta-ghost {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.cta-ghost .cta-icon {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* Ciemna pigułka - aktywny element paska (jak „Quick Relief” w referencji). */
+.pill-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dark);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pill-dark .i {
+  width: 18px;
+  height: 18px;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 4px;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 4px;
+}
+
+.text-link:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.text-link .i {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------------------------------------------------------------- */
+/* Pola                                                               */
+/* ---------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field > span {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.input {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-field);
+  background: var(--surface-2);
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.input:focus {
+  border-color: var(--orange);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgb(255 106 43 / 0.12);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--err);
+}
+
+textarea.input {
+  resize: none;
+  line-height: 1.45;
+}
+
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.hint .i {
+  width: 16px;
+  height: 16px;
+  margin-top: 0.5px;
+}
+
+.hint.is-ok {
+  color: var(--ok);
+}
+
+.hint.is-warn {
+  color: #b5600f;
+}
+
+.hint.is-err {
+  color: var(--err);
+}
+
+.trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.screen:not([hidden]) > * {
+  animation: rise 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.screen:not([hidden]) > :nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.screen:not([hidden]) > :nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.screen:not([hidden]) > :nth-child(4) {
+  animation-delay: 0.09s;
+}
+
+.screen:not([hidden]) > :nth-child(n + 5) {
+  animation-delay: 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
+}
