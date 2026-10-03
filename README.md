@@ -40,7 +40,9 @@ flowchart LR
 | **Firma** | nazwa i link z „Poproś o opinie” w Profilu Firmy Google, sprawdzany na żywo |
 | **Uwagi** | gdzie mają trafiać wiadomości przy 1–3 gwiazdkach: na e-mail albo na stronę firmy |
 | **E-mail** | 6-cyfrowy kod z maila zamiast konta i hasła |
-| **Panel** | link z przyciskami Kopiuj i Udostępnij, gotowa wiadomość SMS, statystyki z 7 dni, oferta automatycznej wysyłki |
+| **Panel** | link z przyciskami Kopiuj i Udostępnij, kod QR, gotowa wiadomość SMS, statystyki z 7 dni, oferta automatycznej wysyłki |
+
+**Kod QR** prowadzi do tego samego linku. Do pobrania są trzy formaty: PNG (1200 px), SVG (wektor do druku) i gotowa karta A6 w 300 dpi z nazwą firmy, gwiazdkami i kodem, do położenia na fakturze, wizytówce albo na aucie. Wszystko generuje się w przeglądarce ([`assets/qr.js`](public/assets/qr.js), biblioteka [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), MIT, w [`assets/vendor/`](public/assets/vendor/)).
 
 Jeden adres e-mail = jeden stały link (np. `/o/k3x9ab`). Zmiana danych nie zmienia adresu, więc wysłane wcześniej linki dalej działają. Na desktopie obok formularza jest telefon z podglądem na żywo, a na telefonie podgląd otwiera się przyciskiem z okiem.
 
@@ -94,15 +96,33 @@ API:
 - **Nazwa firmy w szablonie:** tekst escapuje HTMLRewriter, a w JSON każdy `<` jest zamieniany na `<`.
 - **Prywatność:** treści uwag nie zapisujemy, a adresy IP trzymamy tylko jako hash.
 
+## Marka
+
+Aplikacja występuje pod marką **Design House**. Wordmark i znak (trzy kwadraty o stałym promieniu narożnika) pochodzą prosto z designhouse.me ([`public/brand/`](public/brand/)), tak samo jak favicony i ikona dla iOS. Kolor interfejsu to pomarańcz `#ff6a2b` z referencji projektu.
+
+Obrazki do podglądu linku w SMS-ie, na WhatsAppie i w social mediach: [`public/og.png`](public/og.png) (generator) i [`public/og-ocena.png`](public/og-ocena.png) (strona oceny; tytuł z nazwą firmy dopisuje Worker). Źródłem obu jest [`design/og.html`](design/og.html): zrzut 1200×630 w Playwright z `?v=app` i `?v=ocena`. Maile mają prosty szablon w barwach Design House, bez obrazków.
+
 ## Grafiki
 
 Ilustracje generuje Codex (`codex exec` z obrazem referencyjnym), wszystkie w jednym stylu: czarna kreska, czarne wypełnienia, pomarańczowe akcenty, przezroczyste tło. Zlecenia dla Codexa leżą w [`design/codex-*.md`](design/), źródła PNG w [`design/zrodla/`](design/zrodla/), a gotowe pliki WebP w [`public/img/`](public/img/).
 
-<!-- GRAFIKI -->
+| Plik (`public/img/`) | Do czego |
+|---|---|
+| `hero-fachowiec` | start generatora |
+| `dzieki-google`, `dzieki-wiadomosc` | podziękowania na stronie oceny |
+| `kod-mail` | krok z kodem z maila |
+| `blad-link` | nieaktywny link i 404 |
+| `tlo-jasne` | tło panelu z telefonem (render 3D, kostki ze znaku DH) |
+| `tlo-ciemne` | karta oferty w panelu; alternatywa dla tła podglądu |
+| `fach-elektryk`, `fach-hydraulik`, `fach-ogrodnik`, `fach-mechanik`, `fach-fryzjerka`, `fach-sprzatanie` | zapas: warianty startu pod branże |
+| `pusto-czekam`, `gotowe-link`, `edycja` | zapas: puste statystyki, świeżo utworzony link, edycja |
+| `automat-sms`, `widget-strona`, `statystyki`, `kod-qr` | zapas: automatyczna wysyłka, widżet na stronę, statystyki, QR |
+
+Nowe grafiki w tym samym stylu: wspólne zasady leżą w [`design/_styl.md`](design/_styl.md), a uruchomienie to `codex exec -i design/1.png -i design/zrodla/hero-fachowiec.png - < design/codex-….md`.
 
 ## Przed startem na produkcji
 
-1. **Domena:** subdomena (np. `opinie.designhouse.me`) albo osobna krótka domena, która daje krótsze linki i oddziela reputację od designhouse.me. Ustawić `PUBLIC_ORIGIN` i dodać trasę w `wrangler.jsonc`.
+1. **Domena (przed promowaniem kodów QR):** subdomena (np. `opinie.designhouse.me`) albo osobna krótka domena, która daje krótsze linki i oddziela reputację od designhouse.me. Wydrukowany kod QR ma adres zapisany na stałe, więc po zmianie domeny stary adres `*.workers.dev` musi dalej przekierowywać. Ustawić `PUBLIC_ORIGIN`, dodać trasę w `wrangler.jsonc` i podmienić absolutny adres `og:image` w `public/index.html`.
 2. **Turnstile:** założyć widżet, potem `TURNSTILE_SECRET` (sekret) i `TURNSTILE_SITE_KEY` (zmienna).
 3. **Maile:** sprawdzić na prawdziwym adresie spoza designhouse.me, że kod dochodzi. Nadawca jest ustawiony w `MAIL_FROM`.
 4. **Fonty:** Urbanist ładuje się dziś z Google Fonts, także na stronie dla klientów firm. Pod RODO lepiej trzymać go u siebie (licencja OFL).
