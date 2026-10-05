@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://dh-opinie.maciej-36d.workers.dev"><b>Zrób link dla swojej firmy</b></a>
+  <a href="https://reviewlink.designhouse.me"><b>Zrób link dla swojej firmy</b></a>
   &nbsp;·&nbsp; narzędzie od <a href="https://designhouse.me">Design House</a>
 </p>
 
@@ -35,7 +35,7 @@ Po skończonym zleceniu wysyłasz klientowi swój link. Klient widzi pięć gwia
 
 ## Jak zacząć
 
-1. **Wejdź na [stronę ReviewLink](https://dh-opinie.maciej-36d.workers.dev)** i wpisz nazwę firmy.
+1. **Wejdź na [stronę ReviewLink](https://reviewlink.designhouse.me)** i wpisz nazwę firmy.
 2. **Wklej link do opinii z Google.** W Profilu Firmy w Google kliknij „Poproś o opinie” i skopiuj link. Od razu sprawdzamy, czy działa.
 3. **Wybierz, gdzie mają trafiać uwagi** przy 1–3 gwiazdkach: na Twój e-mail albo do formularza na Twojej stronie.
 4. **Potwierdź e-mail** 6-cyfrowym kodem. Nie zakładasz konta i nie wymyślasz hasła.

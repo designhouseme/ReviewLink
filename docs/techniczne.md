@@ -1,6 +1,6 @@
 # ReviewLink: dokumentacja techniczna
 
-Cloudflare Workers + D1, maile przez Resend, bez frameworka i bez builda. Opis dla użytkowników jest w [README](../README.md).
+Cloudflare Workers + D1, maile przez SMTP, bez frameworka i bez builda. Opis dla użytkowników jest w [README](../README.md).
 
 ## Link i kod QR
 
@@ -18,7 +18,7 @@ npm run db:seed                  # przykładowe linki: /o/demo123 i /o/demourl
 npm run dev                      # http://localhost:8790
 ```
 
-Bez `RESEND_API_KEY` maile lokalnie nie wychodzą, tylko ich treść tekstowa ląduje w konsoli `wrangler dev`. Podgląd HTML wszystkich maili z przykładowymi danymi:
+Bez `SMTP_PASSWORD` w `.dev.vars` maile lokalnie nie wychodzą, tylko ich treść tekstowa ląduje w konsoli `wrangler dev`. Z hasłem idą naprawdę, tak jak na produkcji. Podgląd HTML wszystkich maili z przykładowymi danymi:
 
 ```bash
 node scripts/email-preview.mjs   # pliki w .wrangler/email-preview/
@@ -34,12 +34,12 @@ curl "http://localhost:8790/cdn-cgi/handler/scheduled?cron=0+6+*+*+1"
 ## Wdrożenie
 
 ```bash
-npx wrangler secret put RESEND_API_KEY                # raz, klucz z panelu Resend
+npx wrangler secret put SMTP_PASSWORD                 # raz, hasło skrzynki z MAIL_FROM
 npx wrangler d1 migrations apply dh-opinie --remote   # po każdej nowej migracji (teraz 0002)
 npm run deploy                                        # wrangler deploy
 ```
 
-Na koncie są już: Worker `dh-opinie`, baza D1 `dh-opinie` (region EEUR) i sekret `HASH_PEPPER`. Brakuje `RESEND_API_KEY`: bez niego na produkcji nie wyjdzie żaden mail, także kod logowania.
+Sekrety to `HASH_PEPPER` i `SMTP_PASSWORD`. Bez `SMTP_PASSWORD` na produkcji nie wyjdzie żaden mail, także kod logowania.
 
 ## Jak to jest zbudowane
 
@@ -47,7 +47,7 @@ Na koncie są już: Worker `dh-opinie`, baza D1 `dh-opinie` (region EEUR) i sekr
 |---|---|
 | [`src/worker.js`](../src/worker.js) | API `/api/*`, strona oceny `/o/:id` (szablon i dane przez HTMLRewriter) i cron z raportem tygodniowym |
 | [`src/emails.js`](../src/emails.js) | szablony maili (HTML i tekst), czysty moduł do podglądu w Node |
-| [`src/mailer.js`](../src/mailer.js) | wysyłka przez Resend: pojedyncze maile i paczki do 100 |
+| [`src/mailer.js`](../src/mailer.js) | klient SMTP na `cloudflare:sockets`: pojedyncze maile i paczki po 25 jednym połączeniem |
 | [`migrations/0001_init.sql`](../migrations/0001_init.sql) | tabele `links`, `codes`, `sessions`, `events` |
 | [`migrations/0002_raport_tygodniowy.sql`](../migrations/0002_raport_tygodniowy.sql) | `links.weekly` (zgoda na raport) i `links.report_week` (ostatnio wysłany tydzień) |
 | [`public/mail/`](../public/mail/) | grafiki PNG i font Urbanist do maili; PNG robi [`scripts/mail-assets.mjs`](../scripts/mail-assets.mjs) |
@@ -69,16 +69,16 @@ API:
 
 ## Maile
 
-Wszystkie idą przez Resend z adresu `MAIL_FROM` (domena musi być zweryfikowana w Resend, z rekordami SPF i DKIM). Szablony w [`src/emails.js`](../src/emails.js) są w stylu aplikacji: ciepłe tło, biała karta, brzoskwiniowa poświata z ilustracją z serii, pomarańczowe gwiazdki i duże cienkie cyfry. Są zbudowane na tabelach i stylach inline, a grafiki to PNG (Gmail i Outlook nie pokazują SVG ani WebP). Z zablokowanymi obrazkami mail dalej jest czytelny.
+Wszystkie idą z adresu `MAIL_FROM` przez serwer `SMTP_HOST`: port 587 ze STARTTLS, logowanie AUTH PLAIN. Port 25 jest w Workers zablokowany. Klient SMTP jest własny, bez zależności: nagłówki z polskimi znakami koduje według RFC 2047, treść w quoted-printable, wersja tekstowa i HTML jako `multipart/alternative`. Zwroty wracają na adres `MAIL_FROM`. Szablony w [`src/emails.js`](../src/emails.js) są w stylu aplikacji: ciepłe tło, biała karta, brzoskwiniowa poświata z ilustracją z serii, pomarańczowe gwiazdki i duże cienkie cyfry. Są zbudowane na tabelach i stylach inline, a grafiki to PNG (Gmail i Outlook nie pokazują SVG ani WebP). Z zablokowanymi obrazkami mail dalej jest czytelny.
 
 | Mail | Kiedy |
 |---|---|
 | Kod logowania | `POST /api/code` |
 | Link gotowy | pierwszy zapis linku |
-| Uwagi od klienta | 1–3 gwiazdki i wiadomość; `reply_to` to kontakt klienta, jeśli podał e-mail |
+| Uwagi od klienta | 1–3 gwiazdki i wiadomość; `Reply-To` to kontakt klienta, jeśli podał e-mail |
 | Podsumowanie tygodnia | cron w poniedziałek 6:00 UTC |
 
-**Podsumowanie tygodnia** obejmuje poprzedni pełny tydzień od poniedziałku do niedzieli w czasie warszawskim, także w tygodniach ze zmianą czasu. Dostają je firmy z `weekly = 1`, u których w tym tygodniu było choć jedno zdarzenie: tydzień samych zer nie jest wysyłany. Paczki po 100 maili mają `Idempotency-Key`, a po udanej paczce zapisujemy `report_week`, więc ponowne uruchomienie crona nie wyśle raportu drugi raz. Mail ma nagłówki `List-Unsubscribe` i `List-Unsubscribe-Post` (wypis jednym kliknięciem w Gmailu). Ponownego zapisu na raport w panelu jeszcze nie ma.
+**Podsumowanie tygodnia** obejmuje poprzedni pełny tydzień od poniedziałku do niedzieli w czasie warszawskim, także w tygodniach ze zmianą czasu. Dostają je firmy z `weekly = 1`, u których w tym tygodniu było choć jedno zdarzenie: tydzień samych zer nie jest wysyłany. Maile wychodzą paczkami po 25 jednym połączeniem SMTP. Po każdej paczce zapisujemy `report_week` firmom, do których mail wyszedł, więc ponowne uruchomienie crona nie wyśle raportu drugi raz, a odrzucony adres nie blokuje reszty paczki. Mail ma nagłówki `List-Unsubscribe` i `List-Unsubscribe-Post` (wypis jednym kliknięciem w Gmailu). Ponownego zapisu na raport w panelu jeszcze nie ma.
 
 ## Zabezpieczenia
 
@@ -114,9 +114,9 @@ Nowe grafiki w tym samym stylu: wspólne zasady leżą w [`design/_styl.md`](../
 
 ## Przed startem na produkcji
 
-1. **Domena (przed promowaniem kodów QR):** subdomena (np. `opinie.designhouse.me`) albo osobna krótka domena, która daje krótsze linki i oddziela reputację od designhouse.me. Wydrukowany kod QR ma adres zapisany na stałe, więc po zmianie domeny stary adres `*.workers.dev` musi dalej przekierowywać. Zmienić `PUBLIC_ORIGIN` w `wrangler.jsonc` (z niego biorą się linki w mailach), dodać trasę i podmienić absolutny adres `og:image` w `public/index.html`.
+1. **Domena:** aplikacja jest pod `reviewlink.designhouse.me`. Wydrukowany kod QR ma adres zapisany na stałe, więc przy każdej kolejnej zmianie domeny stary adres musi dalej przekierowywać. Zmienić wtedy `PUBLIC_ORIGIN` i `routes` w `wrangler.jsonc` (z `PUBLIC_ORIGIN` biorą się linki w mailach) i absolutny adres `og:image` w `public/index.html`.
 2. **Turnstile:** założyć widżet, potem `TURNSTILE_SECRET` (sekret) i `TURNSTILE_SITE_KEY` (zmienna).
-3. **Maile:** zweryfikować domenę `designhouse.me` w Resend, ustawić sekret `RESEND_API_KEY` i sprawdzić na prawdziwym adresie spoza designhouse.me (Gmail, Outlook), że kod dochodzi i nie trafia do spamu.
+3. **Maile:** domena nadawcy potrzebuje SPF, DKIM i DMARC. Sprawdzić na prawdziwym adresie w Gmailu i Outlooku, że kod dochodzi i nie trafia do spamu. Serwery SMTP mają limity wysyłki: przy wielu firmach raport tygodniowy może je przekroczyć.
 4. **Fonty:** Urbanist ładuje się dziś z Google Fonts, także na stronie dla klientów firm. Pod RODO lepiej trzymać go u siebie (licencja OFL).
 5. **Sprzątanie:** wygasłe sesje usuwa logowanie, ale stare `codes` i `events` warto czyścić cronem.
 6. **Nagłówki:** przy dodawaniu `_headers` zostawić `frame-ancestors 'self'`, bo inaczej podgląd w ramce telefonu przestanie działać.

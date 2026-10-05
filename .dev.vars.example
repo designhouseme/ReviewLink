@@ -3,5 +3,5 @@
 DEV_SHOW_CODE=1
 # Adres aplikacji w mailach i linkach (na produkcji ustawiony w wrangler.jsonc).
 PUBLIC_ORIGIN=http://localhost:8790
-# Opcjonalnie: prawdziwa wysyłka przez Resend także lokalnie. Bez klucza maile lądują w konsoli.
-# RESEND_API_KEY=re_...
+# Opcjonalnie: prawdziwa wysyłka przez SMTP także lokalnie. Bez hasła maile lądują w konsoli.
+# SMTP_PASSWORD=...

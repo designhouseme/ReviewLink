@@ -4,7 +4,8 @@
  * Statyczne pliki z `public/` (generator, szablon strony oceny, grafiki) plus
  * Worker, który obsługuje tylko `/api/*` i strony oceny `/o/:id`.
  * Dane: D1 (linki, jednorazowe kody, sesje, zdarzenia do statystyk).
- * Maile: Cloudflare Email Sending - kody, gotowy link i uwagi od klientów.
+ * Maile: SMTP - kody, gotowy link, uwagi od klientów
+ * i raport tygodniowy.
  *
  * Lokalnie: `npm run db:local && npm run db:seed && npm run dev`.
  */
@@ -32,25 +33,31 @@
     }
   ],
 
-  // Maile idą przez Resend (src/mailer.js). Klucz to sekret:
-  //   npx wrangler secret put RESEND_API_KEY
-  // a domena z MAIL_FROM musi być zweryfikowana w Resend. Lokalnie bez klucza
-  // maile tylko lądują w konsoli (DEV_SHOW_CODE=1 w .dev.vars).
+  // Maile idą przez SMTP (src/mailer.js), port 587 ze STARTTLS.
+  // Hasło skrzynki to sekret:
+  //   npx wrangler secret put SMTP_PASSWORD
+  // Lokalnie bez hasła maile tylko lądują w konsoli (DEV_SHOW_CODE=1 w .dev.vars).
   "vars": {
-    "MAIL_FROM": "kontakt@designhouse.me",
+    "MAIL_FROM": "noreply@reviewhouse.pl",
     "MAIL_FROM_NAME": "ReviewLink · Design House",
+    "SMTP_HOST": "smtp.dpoczta.pl",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "noreply@reviewhouse.pl",
     "CONTACT_URL": "https://designhouse.me/kontakt",
     // Adres w mailach i linkach. Cron nie ma żądania, więc musi go znać z góry.
     // Lokalnie nadpisuje go .dev.vars (http://localhost:8790).
-    "PUBLIC_ORIGIN": "https://dh-opinie.maciej-36d.workers.dev"
+    "PUBLIC_ORIGIN": "https://reviewlink.designhouse.me"
   },
+
+  // Własna domena: Cloudflare sam zakłada rekord DNS i certyfikat.
+  "routes": [{ "pattern": "reviewlink.designhouse.me", "custom_domain": true }],
 
   // Raport tygodniowy: poniedziałek 6:00 UTC (8:00 latem, 7:00 zimą w Polsce).
   // Test lokalnie: npm run dev -- --test-scheduled, potem
   //   curl "http://localhost:8790/cdn-cgi/handler/scheduled?cron=0+6+*+*+1"
   "triggers": { "crons": ["0 6 * * 1"] },
 
-  // Na razie tylko adres testowy: dh-opinie.maciej-36d.workers.dev.
+  // Adres testowy dh-opinie.maciej-36d.workers.dev działa dalej.
   "workers_dev": true,
 
   "observability": { "enabled": true }

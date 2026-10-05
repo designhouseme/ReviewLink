@@ -14,7 +14,7 @@
 import { normalizeEmail, normalizeGoogleUrl, normalizeSiteUrl } from "../public/assets/links.js";
 import { galleryHtml, sampleEmails } from "./email-samples.js";
 import { codeEmail, feedbackEmail, linkReadyEmail, weeklyEmail } from "./emails.js";
-import { RESEND_BATCH_MAX, sendBatch, sendMail } from "./mailer.js";
+import { SMTP_PER_CONNECTION, sendMail, sendMany } from "./mailer.js";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -373,8 +373,9 @@ async function sessionEmail(request, env) {
 
 /**
  * Raport z poprzedniego pełnego tygodnia (pn 00:00 – nd 24:00 czasu warszawskiego)
- * do każdej firmy, u której coś się działo i która się nie wypisała. Po wysłanej
- * paczce zapisujemy `report_week`, więc ponowne uruchomienie nie wyśle drugi raz.
+ * do każdej firmy, u której coś się działo i która się nie wypisała. Po każdej
+ * paczce zapisujemy `report_week` firmom, do których mail wyszedł, więc ponowne
+ * uruchomienie nie wyśle drugi raz, a odrzucony adres nie blokuje pozostałych.
  */
 async function weeklyReports(env, now = Date.now()) {
   const origin = env.PUBLIC_ORIGIN;
@@ -434,8 +435,8 @@ async function weeklyReports(env, now = Date.now()) {
   const due = links.results.filter((link) => stats.has(link.id)); // tydzień samych zer to szum, nie raport
 
   let sent = 0;
-  for (let i = 0; i < due.length; i += RESEND_BATCH_MAX) {
-    const chunk = due.slice(i, i + RESEND_BATCH_MAX);
+  for (let i = 0; i < due.length; i += SMTP_PER_CONNECTION) {
+    const chunk = due.slice(i, i + SMTP_PER_CONNECTION);
     const mails = await Promise.all(
       chunk.map(async (link) => {
         const unsubscribeUrl = `${origin}/api/raport/wypisz?l=${link.id}&s=${await unsubscribeSig(env, link.id)}`;
@@ -448,10 +449,13 @@ async function weeklyReports(env, now = Date.now()) {
       }),
     );
     try {
-      const ids = chunk.map((link) => link.id);
-      await sendBatch(env, mails, { idempotencyKey: `weekly-${weekId}-${(await sha256(ids.join(","))).slice(0, 16)}` });
-      await env.DB.prepare(`UPDATE links SET report_week = ? WHERE id IN (${ids.map(() => "?").join(",")})`).bind(weekId, ...ids).run();
-      sent += chunk.length;
+      const results = await sendMany(env, mails);
+      const ids = chunk.filter((link, k) => {
+        if (results[k].error) console.error(`raport ${weekId}, link ${link.id}:`, results[k].error);
+        return results[k].ok;
+      }).map((link) => link.id);
+      if (ids.length) await env.DB.prepare(`UPDATE links SET report_week = ? WHERE id IN (${ids.map(() => "?").join(",")})`).bind(weekId, ...ids).run();
+      sent += ids.length;
     } catch (error) {
       console.error(`raport ${weekId}, paczka od ${i}:`, error);
     }
